@@ -93,7 +93,6 @@ const loadPaystack = async () => {
   }
 };
 
-
 export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [visualSlide, setVisualSlide] = useState(0);
