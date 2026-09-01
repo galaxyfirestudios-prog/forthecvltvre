@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "node scripts/generate-radio-playlist.mjs && node scripts/generate-beat-catalog.mjs && vite build",
+    "build": "node scripts/generate-radio-playlist.mjs && vite build",
     "verify:editorial": "node --input-type=module -e \"import fs from 'node:fs'; const f=JSON.parse(fs.readFileSync('public/editorial-feed.json','utf8')); if(!Array.isArray(f.stories)) throw new Error('Invalid editorial feed'); console.log('Editorial feed stories:', f.stories.length)\"",
     "preview": "vite preview",
     "format": "oxfmt"
