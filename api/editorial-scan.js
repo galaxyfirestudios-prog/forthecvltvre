@@ -9,9 +9,6 @@ const SOURCES = [
   { name: 'PUNCH Special Features', url: 'https://rss.punchng.com/v1/category/special_feature', weight: 7 },
   { name: 'PUNCH Videos', url: 'https://rss.punchng.com/v1/category/videos', weight: 5 },
   { name: 'The Guardian Nigeria', url: process.env.EDITORIAL_GUARDIAN_FEED || 'https://guardian.ng/feed/', weight: 8 },
-  { name: 'NotJustOk', url: process.env.EDITORIAL_NOTJUSTOK_FEED || 'https://notjustok.com/feed/', weight: 13 },
-  { name: 'tooXclusive', url: process.env.EDITORIAL_TOOXCLUSIVE_FEED || 'https://tooxclusive.com/feed/', weight: 11 },
-  { name: 'Naijaloaded', url: process.env.EDITORIAL_NAIJALOADED_FEED || 'https://www.naijaloaded.com.ng/feed/', weight: 9 },
 ]
 
 const RELEVANCE_TERMS = [
@@ -278,13 +275,13 @@ async function publishBatch(supabase, items, drafts) {
 }
 
 module.exports = async (req, res) => {
-  // Cron-job.org should send X-Cron-Secret: <CRON_SECRET>. Authorization: Bearer
-  // remains supported for manual tests and other schedulers.
+  // Vercel Cron authenticates with CRON_SECRET via Authorization: Bearer <secret>.
+  // EDITORIAL_CRON_SECRET remains available for manual/editorial calls.
   const cronSecret = process.env.CRON_SECRET || ''
   const editorialSecret = process.env.EDITORIAL_CRON_SECRET || ''
   const auth = req.headers.authorization || ''
   const bearer = auth.startsWith('Bearer ') ? auth.slice(7) : ''
-  const supplied = req.headers['x-cron-secret'] || req.headers['x-editorial-secret'] || bearer || req.query?.secret
+  const supplied = req.headers['x-editorial-secret'] || req.query?.secret || bearer
   const authorized = Boolean(supplied) && [cronSecret, editorialSecret].filter(Boolean).includes(supplied)
   if (!authorized) return res.status(401).json({ error: 'Unauthorized' })
   if (req.method !== 'GET' && req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
