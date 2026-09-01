@@ -35,7 +35,7 @@
   "crons": [
     {
       "path": "/api/editorial-scan",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 0 * * *"
     }
   ],
   "headers": [
