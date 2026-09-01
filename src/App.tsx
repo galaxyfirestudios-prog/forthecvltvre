@@ -1,15 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import cultureArt from "@/imports/for-the-culture.webp";
-import visual01 from "@/imports/visuals/visual_01.webp";
-import visual02 from "@/imports/visuals/visual_02.webp";
-import visual03 from "@/imports/visuals/visual_03.webp";
-import visual04 from "@/imports/visuals/visual_04.webp";
-import visual05 from "@/imports/visuals/visual_05.webp";
-import visual06 from "@/imports/visuals/visual_06.webp";
-import visual07 from "@/imports/visuals/visual_07.webp";
-import visual08 from "@/imports/visuals/visual_08.webp";
-
-const visualPool = [visual01, visual02, visual03, visual04, visual05, visual06, visual07, visual08];
 
 type Story = {
   id?: string;
@@ -281,8 +271,14 @@ export default function App() {
 
   const hero = stories[0];
   const latest = stories.slice(1, 4);
-  const musicStories = useMemo(() => stories.filter((story) => /music|artist|album|single|afrobeats|hip-hop|song|release/i.test(`${story.category || ""} ${storyTitle(story)} ${story.dek || ""}`)).slice(0, 3), [stories]);
-  const cultureStories = useMemo(() => stories.filter((story) => /culture|fashion|art|style|creative|entertainment|film|media/i.test(`${story.category || ""} ${storyTitle(story)} ${story.dek || ""}`)).slice(0, 3), [stories]);
+  const musicStories = useMemo(() => {
+    const matching = stories.filter((story) => /music|artist|album|single|afrobeats|hip-hop|song|release/i.test(`${story.category || ""} ${storyTitle(story)} ${story.dek || ""}`));
+    return [...matching, ...stories.filter((story) => !matching.includes(story))].slice(0, 3);
+  }, [stories]);
+  const cultureStories = useMemo(() => {
+    const matching = stories.filter((story) => /culture|fashion|art|style|creative|entertainment|film|media/i.test(`${story.category || ""} ${storyTitle(story)} ${story.dek || ""}`));
+    return [...matching, ...stories.filter((story) => !matching.includes(story))].slice(0, 3);
+  }, [stories]);
   const searchResults = useMemo(() => {
     if (!searchTerm.trim()) return stories.slice(0, 6);
     const term = searchTerm.toLowerCase();
@@ -407,7 +403,7 @@ export default function App() {
 
         <section className="content-section" id="music">
           <div className="section-head"><div><span className="eyebrow">03 / SOUND</span><h2>MUSIC DISCOVERY</h2></div><span className="muted">NEW MUSIC · TRENDING · AFRICAN SOUND</span></div>
-          <div className="music-grid">{(musicStories.length ? musicStories : visualPool.slice(0, 3).map((image, index) => ({ headline: ["NEW MUSIC IS MOVING", "THE SOUND OF THE MOMENT", "EMERGING VOICES"][index], image_url: image } as Story))).map((story, index) => <article className="music-card" key={storyKey(story)}><img src={safeImage(story)} alt="" loading="lazy" /><div><span>0{index + 1} / MUSIC</span><h3>{storyTitle(story)}</h3>{story.dek && <p>{story.dek}</p>}{story.id && <button type="button" onClick={() => openStory(story)}>EXPLORE →</button>}</div></article>)}</div>
+          <div className="music-grid">{musicStories.map((story, index) => <article className="music-card" key={storyKey(story)}><img src={safeImage(story)} alt={storyTitle(story)} loading="lazy" /><div><span>0{index + 1} / {(story.category || "MUSIC").toUpperCase()}</span><h3>{storyTitle(story)}</h3>{story.dek && <p>{story.dek}</p>}<button type="button" onClick={() => openStory(story)}>EXPLORE →</button></div></article>)}{!stories.length && <div className="empty-feed"><strong>THE MUSIC DESK IS BETWEEN STORIES.</strong><p>Music stories will appear automatically as the editorial feed fills.</p></div>}</div>
         </section>
 
         <section className="radio-feature" aria-label="For the Culture live radio">
@@ -418,12 +414,12 @@ export default function App() {
 
         <section className="content-section" id="culture">
           <div className="section-head"><div><span className="eyebrow">05 / CULTURE</span><h2>MORE THAN MUSIC.</h2></div><span className="muted">FASHION · ART · LIFESTYLE · AFRICA</span></div>
-          <div className="culture-grid">{(cultureStories.length ? cultureStories : visualPool.slice(3, 6).map((image, index) => ({ headline: ["AFRICAN CREATIVITY, IN MOTION", "STYLE IS A LANGUAGE", "THE CULTURE EDIT"][index], image_url: image } as Story))).map((story) => <article key={storyKey(story)}><img src={safeImage(story)} alt="" loading="lazy" /><div><span>{(story.category || "CULTURE").toUpperCase()}</span><h3>{storyTitle(story)}</h3>{story.id && <button type="button" onClick={() => openStory(story)}>READ →</button>}</div></article>)}</div>
+          <div className="culture-grid">{cultureStories.map((story) => <article key={storyKey(story)}><img src={safeImage(story)} alt={storyTitle(story)} loading="lazy" /><div><span>{(story.category || "CULTURE").toUpperCase()}</span><h3>{storyTitle(story)}</h3><button type="button" onClick={() => openStory(story)}>READ →</button></div></article>)}{!stories.length && <div className="empty-feed"><strong>THE CULTURE DESK IS BETWEEN STORIES.</strong><p>Culture stories will appear automatically as the editorial feed fills.</p></div>}</div>
         </section>
 
         <section className="originals-section" id="videos">
           <div className="originals-copy"><span className="eyebrow">06 / FTC ORIGINALS</span><h2>WATCH.<br /><em>LISTEN.</em><br />DISCOVER.</h2><p>Interviews, studio sessions, documentaries, culture conversations and original video — built to give FTC a voice beyond the feed.</p><a className="secondary-button" href="#events">EXPLORE ORIGINALS →</a></div>
-          <div className="video-grid">{visualPool.slice(0, 4).map((image, index) => <article key={image}><img src={image} alt="FTC Originals visual" loading="lazy" /><button type="button"><span>▶</span><div><small>FTC ORIGINALS · 0{index + 1}</small><strong>{["STUDIO SESSIONS", "THE CULTURE CONVERSATION", "ARTISTS IN MOTION", "BEHIND THE SOUND"][index]}</strong></div></button></article>)}</div>
+          <div className="video-grid">{stories.slice(0, 4).map((story, index) => <article key={storyKey(story)}><img src={safeImage(story)} alt={storyTitle(story)} loading="lazy" /><button type="button" onClick={() => openStory(story)}><span>▶</span><div><small>FTC ORIGINALS · 0{index + 1}</small><strong>{storyTitle(story)}</strong></div></button></article>)}{!stories.length && <div className="empty-feed"><strong>FTC ORIGINALS ARE COMING INTO FOCUS.</strong><p>New stories and original media will appear here as they are published.</p></div>}</div>
         </section>
 
         <section className="events-section" id="events">

@@ -76,7 +76,7 @@ async function fetchArticleImage(pageUrl) {
   try {
     const response = await fetch(pageUrl, {
       headers: {
-        'User-Agent': 'FOR-THE-CULTURE-Editorial-Radar/5.0 (+https://galaxyfirestudios.com)',
+        'User-Agent': 'FOR-THE-CULTURE-Editorial-Radar/6.0',
         Accept: 'text/html,application/xhtml+xml'
       },
       signal: controller.signal,
@@ -117,7 +117,7 @@ function parseFeed(xml, sourceName, sourceWeight) {
 async function fetchFeed(source) {
   const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
   try {
-    const response = await fetch(source.url, { headers: { 'User-Agent': 'FOR-THE-CULTURE-Editorial-Radar/4.0 (+https://galaxyfirestudios.com)', Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*' }, signal: controller.signal, redirect: 'follow' })
+    const response = await fetch(source.url, { headers: { 'User-Agent': 'FOR-THE-CULTURE-Editorial-Radar/6.0', Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*' }, signal: controller.signal, redirect: 'follow' })
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     return { source, items: parseFeed(await response.text(), source.name, source.weight) }
   } finally { clearTimeout(timer) }
