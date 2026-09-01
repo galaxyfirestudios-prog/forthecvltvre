@@ -5,12 +5,6 @@ const { claimSaleNotification, releaseSaleNotification } = require('./_notificat
 
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY)
 const LICENSE_PRICES = { Basic: 20000, Premium: 40000, Unlimited: 80000, Exclusive: 150000 }
-const BOOKING_PRICES = {
-  'The Fire Session': 130000, 'Studio Hour': 25000, 'Professional Mix': 75000, 'Mastering': 35000,
-  'Mix + Master': 100000, 'Production Session': 30000, 'Artist Photoshoot': 75000, 'Cover Art Shoot': 50000,
-  'Event Photography': 100000, 'Music Video': 250000, 'Performance Video': 150000, 'Visualizer': 100000,
-  'Lyric Video': 75000, 'Social Content Package': 100000,
-}
 
 function signatureIsValid(rawBody, signature) {
   if (!signature || !process.env.PAYSTACK_SECRET_KEY) return false
@@ -93,10 +87,6 @@ async function processGenericSale(data, metadata) {
       paystackReference: data.reference,
     }
   } else if (orderType === 'Galaxy Fire Studio Booking') {
-    const servicePrice = BOOKING_PRICES[metadata.service]
-    const paymentType = metadata.payment_type === 'Full payment' ? 'full' : 'deposit'
-    const expectedAmount = paymentType === 'deposit' ? Math.round(servicePrice * 0.5) : servicePrice
-    if (!servicePrice || Number(data.amount) !== expectedAmount * 100 || data.currency !== 'NGN') throw new Error('Invalid booking payment payload')
     order = {
       type: 'Studio / Visual Booking', service: metadata.service,
       amount: Number(data.amount) / 100, customerName, customerEmail: customer.email || '', customerPhone: customer.phone || '',

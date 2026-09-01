@@ -3,9 +3,6 @@
     "api/verify-payment.js": {
       "maxDuration": 10
     },
-    "api/paystack-config.js": {
-      "maxDuration": 5
-    },
     "api/check-availability.js": {
       "maxDuration": 10
     },
@@ -23,9 +20,6 @@
     },
     "api/editorial-scan.js": {
       "maxDuration": 30
-    },
-    "api/artist-submission.js": {
-      "maxDuration": 15
     }
   },
   "rewrites": [
@@ -36,6 +30,12 @@
     {
       "source": "/(.*)",
       "destination": "/index.html"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/editorial-scan",
+      "schedule": "*/15 * * * *"
     }
   ],
   "headers": [
@@ -72,6 +72,24 @@
         {
           "key": "Cache-Control",
           "value": "public, max-age=60, stale-while-revalidate=300"
+        }
+      ]
+    },
+    {
+      "source": "/radio-playlist.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, stale-while-revalidate=86400"
+        }
+      ]
+    },
+    {
+      "source": "/radio-config.json",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600, stale-while-revalidate=86400"
         }
       ]
     }

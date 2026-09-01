@@ -15,7 +15,6 @@ module.exports = async (req, res) => {
     const verify = await fetch(`https://api.paystack.co/transaction/verify/${encodeURIComponent(reference)}`, { headers: { Authorization: `Bearer ${process.env.PAYSTACK_SECRET_KEY}` } })
     const result = await verify.json()
     if (!verify.ok || !result.status || result.data?.status !== 'success') return res.status(400).json({ verified: false, message: 'Payment verification failed.' })
-    if (result.data?.currency !== 'NGN') return res.status(400).json({ verified: false, message: 'Payment currency could not be verified.' })
     if (Number(result.data.amount) !== Number(expectedAmount)) return res.status(400).json({ verified: false, message: 'Payment amount could not be verified.' })
 
     const { data, error } = await supabase.rpc('record_beat_sale', {
