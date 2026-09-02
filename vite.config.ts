@@ -11,7 +11,10 @@ export default defineConfig(({ mode }) => {
   const emitSourcemaps = mode === 'development'
 
   return {
-base: './',
+    base: './',
+    define: {
+      'process.env.NODE_ENV': JSON.stringify(mode === 'development' ? 'development' : 'production'),
+    },
     build: {
       sourcemap: emitSourcemaps ? 'inline' : false,
       minify: !emitSourcemaps,
