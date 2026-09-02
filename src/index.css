@@ -1,6 +1,728 @@
-@import 'tailwindcss';
-:root { font-synthesis: none; text-rendering: optimizeLegibility; }
-html { scroll-behavior: smooth; background: #06040a; }
-body { margin: 0; min-width: 320px; background: #06040a; }
-button, input { font: inherit; }
-img { max-width: 100%; }
+/* ============================================================
+   FOR THE CULTURE
+   GLOBAL LAYOUT + FIXED RADIO SYSTEM
+   ============================================================ */
+
+
+/* ============================================================
+   GLOBAL RESET
+   ============================================================ */
+
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+
+/* ============================================================
+   MEDIA PROTECTION
+   ============================================================ */
+
+img,
+video,
+iframe {
+  max-width: 100%;
+}
+
+img {
+  display: block;
+}
+
+
+/* ============================================================
+   MAIN APP
+   ============================================================ */
+
+.ftc-app {
+  width: 100%;
+  min-width: 0;
+  max-width: none;
+
+  margin: 0;
+
+  /*
+   * Space for the fixed radio player.
+   * This prevents the footer and final content
+   * from being hidden underneath it.
+   */
+  padding-bottom: 110px;
+
+  overflow-x: clip;
+}
+
+
+/* ============================================================
+   STICKY FTC HEADER
+   ============================================================ */
+
+.site-header {
+  position: sticky;
+  top: 0;
+
+  z-index: 9000;
+
+  width: 100%;
+  max-width: 100%;
+
+  margin: 0;
+
+  background: rgba(8, 8, 8, 0.94);
+
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+}
+
+
+/*
+ * Keep header contents inside the viewport.
+ */
+
+.site-header,
+.site-header * {
+  min-width: 0;
+}
+
+
+/* ============================================================
+   FIXED RADIO BAR
+   ============================================================ */
+
+.now-playing-bar {
+  position: fixed;
+
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  width: 100%;
+  max-width: 100vw;
+
+  margin: 0;
+
+  z-index: 9999;
+
+  display: grid;
+
+  grid-template-columns:
+    64px
+    minmax(180px, 1fr)
+    auto
+    minmax(120px, 220px)
+    auto;
+
+  align-items: center;
+
+  gap: 16px;
+
+  min-height: 78px;
+
+  padding: 9px 22px;
+
+  /*
+   * Prevents the bar from becoming transparent
+   * while scrolling over different sections.
+   */
+  background: rgba(8, 8, 8, 0.98);
+
+  border-top: 1px solid rgba(255, 255, 255, 0.14);
+
+  box-shadow:
+    0 -8px 30px rgba(0, 0, 0, 0.35);
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  /*
+   * Protects against iPhone safe areas.
+   */
+  padding-bottom:
+    calc(9px + env(safe-area-inset-bottom));
+}
+
+
+/* ============================================================
+   RADIO ART
+   ============================================================ */
+
+.now-art {
+  width: 60px;
+  height: 60px;
+
+  overflow: hidden;
+
+  flex-shrink: 0;
+
+  background: #151515;
+}
+
+.now-art img {
+  display: block;
+
+  width: 100%;
+  height: 100%;
+
+  object-fit: cover;
+}
+
+
+/* ============================================================
+   RADIO INFORMATION
+   ============================================================ */
+
+.now-copy {
+  min-width: 0;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 2px;
+
+  overflow: hidden;
+}
+
+.now-copy > span {
+  display: block;
+
+  min-width: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  font-size: 8px;
+  font-weight: 800;
+
+  letter-spacing: 0.14em;
+
+  text-transform: uppercase;
+
+  opacity: 0.6;
+}
+
+.now-copy > strong {
+  display: block;
+
+  min-width: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  font-size: 13px;
+  font-weight: 800;
+
+  line-height: 1.2;
+
+  letter-spacing: 0.03em;
+
+  text-transform: uppercase;
+}
+
+.now-copy > small {
+  display: block;
+
+  min-width: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+
+  font-size: 10px;
+
+  line-height: 1.2;
+
+  opacity: 0.6;
+}
+
+
+/* ============================================================
+   SHOW / HOST / GENRE
+   ============================================================ */
+
+.now-program {
+  display: flex;
+
+  align-items: center;
+
+  gap: 10px;
+
+  min-width: 0;
+
+  margin-top: 2px;
+
+  overflow: hidden;
+
+  font-size: 7px;
+  font-weight: 800;
+
+  letter-spacing: 0.1em;
+
+  text-transform: uppercase;
+
+  opacity: 0.4;
+}
+
+.now-program span {
+  min-width: 0;
+
+  overflow: hidden;
+
+  text-overflow: ellipsis;
+
+  white-space: nowrap;
+}
+
+
+/* ============================================================
+   PLAY / PAUSE CONTROL
+   ============================================================ */
+
+.now-control-group {
+  display: flex;
+
+  align-items: center;
+
+  gap: 8px;
+
+  flex-shrink: 0;
+}
+
+.round-control {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  width: 42px;
+  height: 42px;
+
+  padding: 0;
+
+  border: 1px solid rgba(255, 255, 255, 0.22);
+
+  border-radius: 50%;
+
+  background: transparent;
+
+  color: inherit;
+
+  font-size: 12px;
+
+  cursor: pointer;
+
+  transition:
+    background 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.round-control:hover {
+  background: rgba(255, 255, 255, 0.1);
+
+  border-color: rgba(255, 255, 255, 0.5);
+
+  transform: scale(1.04);
+}
+
+.round-control:active {
+  transform: scale(0.96);
+}
+
+.station-label {
+  font-size: 8px;
+  font-weight: 800;
+
+  letter-spacing: 0.13em;
+
+  text-transform: uppercase;
+
+  opacity: 0.55;
+}
+
+
+/* ============================================================
+   RADIO WAVEFORM
+   ============================================================ */
+
+.bar-wave {
+  display: flex;
+
+  align-items: center;
+  justify-content: center;
+
+  gap: 3px;
+
+  width: 100%;
+  min-width: 110px;
+
+  height: 32px;
+
+  overflow: hidden;
+}
+
+.bar-wave i {
+  display: block;
+
+  width: 2px;
+
+  min-height: 4px;
+
+  background: currentColor;
+
+  opacity: 0.45;
+
+  transform-origin: center;
+
+  animation:
+    ftc-radio-wave 1.1s ease-in-out infinite alternate;
+}
+
+.bar-wave i:nth-child(2n) {
+  animation-delay: -0.35s;
+}
+
+.bar-wave i:nth-child(3n) {
+  animation-delay: -0.7s;
+}
+
+.bar-wave i:nth-child(4n) {
+  animation-delay: -0.15s;
+}
+
+@keyframes ftc-radio-wave {
+  from {
+    transform: scaleY(0.5);
+
+    opacity: 0.25;
+  }
+
+  to {
+    transform: scaleY(1);
+
+    opacity: 0.7;
+  }
+}
+
+
+/* ============================================================
+   RADIO META / VOLUME
+   ============================================================ */
+
+.now-meta {
+  display: flex;
+
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 13px;
+
+  flex-shrink: 0;
+
+  min-width: 0;
+}
+
+.quality {
+  font-size: 7px;
+  font-weight: 800;
+
+  letter-spacing: 0.1em;
+
+  opacity: 0.4;
+
+  white-space: nowrap;
+}
+
+.compact-volume {
+  display: flex;
+
+  align-items: center;
+
+  gap: 7px;
+
+  white-space: nowrap;
+}
+
+.compact-volume span {
+  font-size: 7px;
+  font-weight: 800;
+
+  letter-spacing: 0.1em;
+
+  opacity: 0.45;
+}
+
+.compact-volume input {
+  display: block;
+
+  width: 75px;
+
+  margin: 0;
+
+  cursor: pointer;
+
+  accent-color: currentColor;
+}
+
+
+/* ============================================================
+   OLD DRAWER BUTTON
+   ============================================================ */
+
+.expand-radio {
+  display: none !important;
+}
+
+
+/* ============================================================
+   RADIO BAR PAGE CLEARANCE
+   ============================================================ */
+
+.ftc-app {
+  padding-bottom: 110px;
+}
+
+
+/* ============================================================
+   TABLET
+   ============================================================ */
+
+@media (max-width: 1100px) {
+  .now-playing-bar {
+    grid-template-columns:
+      56px
+      minmax(150px, 1fr)
+      auto
+      minmax(90px, 150px)
+      auto;
+
+    gap: 12px;
+
+    min-height: 72px;
+
+    padding: 8px 16px;
+
+    padding-bottom:
+      calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .now-art {
+    width: 54px;
+    height: 54px;
+  }
+
+  .now-copy > strong {
+    font-size: 11px;
+  }
+
+  .now-copy > small {
+    font-size: 9px;
+  }
+
+  .now-program {
+    display: none;
+  }
+
+  .bar-wave {
+    min-width: 80px;
+  }
+
+  .compact-volume input {
+    width: 60px;
+  }
+
+  .station-label {
+    display: none;
+  }
+
+  .ftc-app {
+    padding-bottom: 94px;
+  }
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 700px) {
+  .now-playing-bar {
+    grid-template-columns:
+      50px
+      minmax(0, 1fr)
+      40px;
+
+    gap: 10px;
+
+    min-height: 66px;
+
+    padding: 8px 12px;
+
+    padding-bottom:
+      calc(8px + env(safe-area-inset-bottom));
+  }
+
+  .now-art {
+    width: 50px;
+    height: 50px;
+  }
+
+  .now-copy {
+    min-width: 0;
+
+    overflow: hidden;
+  }
+
+  .now-copy > span {
+    font-size: 6px;
+
+    letter-spacing: 0.12em;
+  }
+
+  .now-copy > strong {
+    font-size: 10px;
+
+    line-height: 1.2;
+  }
+
+  .now-copy > small {
+    font-size: 8px;
+
+    line-height: 1.2;
+  }
+
+  .now-program {
+    display: none;
+  }
+
+  .now-control-group {
+    width: 40px;
+
+    justify-content: flex-end;
+
+    gap: 0;
+  }
+
+  .round-control {
+    width: 38px;
+    height: 38px;
+
+    font-size: 10px;
+  }
+
+  .station-label {
+    display: none;
+  }
+
+  .bar-wave {
+    display: none;
+  }
+
+  .now-meta {
+    display: none;
+  }
+
+  .ftc-app {
+    padding-bottom:
+      calc(82px + env(safe-area-inset-bottom));
+  }
+}
+
+
+/* ============================================================
+   SMALL PHONES
+   ============================================================ */
+
+@media (max-width: 380px) {
+  .now-playing-bar {
+    grid-template-columns:
+      44px
+      minmax(0, 1fr)
+      36px;
+
+    gap: 8px;
+
+    min-height: 60px;
+
+    padding: 6px 9px;
+
+    padding-bottom:
+      calc(6px + env(safe-area-inset-bottom));
+  }
+
+  .now-art {
+    width: 44px;
+    height: 44px;
+  }
+
+  .now-copy > span {
+    font-size: 5px;
+  }
+
+  .now-copy > strong {
+    font-size: 8px;
+  }
+
+  .now-copy > small {
+    font-size: 7px;
+  }
+
+  .now-control-group {
+    width: 36px;
+  }
+
+  .round-control {
+    width: 34px;
+    height: 34px;
+  }
+
+  .ftc-app {
+    padding-bottom:
+      calc(75px + env(safe-area-inset-bottom));
+  }
+}
+
+
+/* ============================================================
+   EXTRA HORIZONTAL-OVERFLOW PROTECTION
+   ============================================================ */
+
+.now-playing-bar,
+.now-playing-bar * {
+  max-width: 100%;
+}
+
+section,
+main,
+header,
+footer {
+  max-width: 100%;
+}

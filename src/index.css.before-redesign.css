@@ -1,0 +1,6 @@
+@import 'tailwindcss';
+:root { font-synthesis: none; text-rendering: optimizeLegibility; }
+html { scroll-behavior: smooth; background: #06040a; }
+body { margin: 0; min-width: 320px; background: #06040a; }
+button, input { font: inherit; }
+img { max-width: 100%; }

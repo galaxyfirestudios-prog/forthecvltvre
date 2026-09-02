@@ -24,12 +24,6 @@ type Track = {
   poster?: string;
 };
 
-type RadioCandidate = {
-  track: Track;
-  index: number;
-  key: string;
-};
-
 const fallbackTrack: Track = {
   artist: "FOR THE CULTURE RADIO",
   title: "Waiting for the next transmission…",
@@ -38,11 +32,17 @@ const fallbackTrack: Track = {
   src: "",
 };
 
+function storageGet(key: string, fallback: string) {
+  try {
+    return localStorage.getItem(key) ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
 function formatDate(value?: string) {
   if (!value) return "LATEST";
-
   const time = Date.parse(value);
-
   if (!time) return "LATEST";
 
   return new Date(time).toLocaleDateString("en-NG", {
@@ -54,19 +54,15 @@ function formatDate(value?: string) {
 
 export default function App() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
   const loadedSrcRef = useRef("");
-  const playRequestRef = useRef(0);
   const radioAdvancingRef = useRef(false);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [menuOpen, setMenuOpen] = useState(false);
-
   const [stories, setStories] = useState<Story[]>([]);
   const [feedStatus, setFeedStatus] = useState<
     "loading" | "ready" | "empty" | "error"
   >("loading");
-
   const [readerStory, setReaderStory] = useState<Story | null>(null);
 
   const [radioPlaylist, setRadioPlaylist] = useState<Track[]>([]);
@@ -77,7 +73,6 @@ export default function App() {
     try {
       const raw = localStorage.getItem("ftc-radio-played-keys") || "[]";
       const value = JSON.parse(raw);
-
       return Array.isArray(value) ? value : [];
     } catch {
       return [];
@@ -85,49 +80,19 @@ export default function App() {
   });
 
   const [radioPlaying, setRadioPlaying] = useState(false);
-
-  const [radioVolume, setRadioVolume] = useState(() => {
-    try {
-      const saved = localStorage.getItem("ftc-radio-volume");
-
-      if (saved !== null) {
-        const parsed = Number(saved);
-
-        if (Number.isFinite(parsed)) {
-          return Math.min(1, Math.max(0, parsed));
-        }
-      }
-    } catch {}
-
-    return 0.85;
-  });
-
-  /*
-   * NOTE:
-   *
-   * There is intentionally NO radio drawer/popup state anymore.
-   * The compact now-playing bar is the only radio player UI.
-   */
-
+  const [radioVolume, setRadioVolume] = useState(0.85);
+  const [radioOpen, setRadioOpen] = useState(false);
   const [radioStreamUrl, setRadioStreamUrl] = useState(
     (import.meta.env.VITE_RADIO_STREAM_URL || "").trim()
   );
-
   const [radioPausedByUser, setRadioPausedByUser] = useState(false);
 
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterMessage, setNewsletterMessage] = useState("");
 
   const radioTrack = radioPlaylist[radioIndex] || fallbackTrack;
-
-  /*
-   * ------------------------------------------------------------
-   * CONTENT HELPERS
-   * ------------------------------------------------------------
-   */
 
   const storyTitle = (story?: Story) =>
     story?.headline || story?.title || "Latest from the culture";
@@ -136,9 +101,6 @@ export default function App() {
 
   const storyKey = (story: Story) =>
     story.source_url || story.id || storyTitle(story);
-
-  const safeImage = (story: Story | undefined) =>
-    storyImage(story) || cultureArt;
 
   /*
    * ------------------------------------------------------------
@@ -150,33 +112,7 @@ export default function App() {
     track.src || `${track.artist || ""}-${track.title || ""}`;
 
   const getArtistKey = (track: Track) =>
-    String(track.artist || "")
-      .toLowerCase()
-      .trim();
-
-  const buildTrackSource = (track: Track) => {
-    const base = import.meta.env.BASE_URL || "/";
-
-    return `${base.replace(/\/$/, "")}/${track.src.replace(/^\//, "")}`;
-  };
-
-  const clearRadioRetry = () => {
-    if (retryTimerRef.current) {
-      clearTimeout(retryTimerRef.current);
-      retryTimerRef.current = null;
-    }
-  };
-
-  /*
-   * ------------------------------------------------------------
-   * PLAY EXACT CURRENT TRACK
-   * ------------------------------------------------------------
-   *
-   * This function NEVER chooses another track.
-   *
-   * If the same source is already loaded, audio.play()
-   * simply resumes the existing track.
-   */
+    String(track.artist || "").toLowerCase().trim();
 
   const playTrack = async (
     index: number,
@@ -186,38 +122,29 @@ export default function App() {
     const track = radioPlaylist[index];
 
     if (!audio || !track?.src) {
+      setRadioOpen(true);
       return false;
     }
 
-    const requestId = ++playRequestRef.current;
-
-    clearRadioRetry();
+    setRadioIndex(index);
 
     if (userInitiated) {
       setRadioPausedByUser(false);
     }
 
-    setRadioIndex(index);
-
-    const src = buildTrackSource(track);
+    const base = import.meta.env.BASE_URL || "/";
+    const src = `${base.replace(/\/$/, "")}/${track.src.replace(
+      /^\//,
+      ""
+    )}`;
     const absolute = new URL(src, window.location.href).href;
 
     /*
-     * CRITICAL:
-     *
-     * Only load the audio source when the source actually changes.
-     *
-     * This prevents PLAYING LIVE from restarting/changing tracks.
+     * Only replace the audio source when the source actually changes.
+     * This prevents unnecessary reloads and keeps playback stable.
      */
-
-    if (
-      loadedSrcRef.current !== src ||
-      audio.src !== absolute
-    ) {
-      try {
-        audio.pause();
-      } catch {}
-
+    if (loadedSrcRef.current !== src || audio.src !== absolute) {
+      audio.pause();
       audio.src = src;
       loadedSrcRef.current = src;
 
@@ -231,173 +158,94 @@ export default function App() {
     try {
       await audio.play();
 
-      if (requestId !== playRequestRef.current) {
-        return false;
-      }
-
       setRadioPlaying(true);
+      setRadioOpen(true);
 
       return true;
     } catch {
-      if (requestId === playRequestRef.current) {
-        setRadioPlaying(false);
-      }
+      setRadioPlaying(false);
+      setRadioOpen(true);
 
       return false;
     }
   };
 
-  /*
-   * ------------------------------------------------------------
-   * START / RESUME RADIO
-   * ------------------------------------------------------------
-   *
-   * If a current track exists, this ALWAYS resumes that exact
-   * track. It does not randomly select another one.
-   */
-
-  const startRadio = async (
-    userInitiated = false
-  ): Promise<boolean> => {
-    clearRadioRetry();
-
-    if (userInitiated) {
-      setRadioPausedByUser(false);
+  const startRadio = async (userInitiated = false) => {
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
     }
-
-    /*
-     * LOCAL PLAYLIST MODE
-     */
 
     if (radioPlaylist.length) {
       const validIndex =
-        radioIndex >= 0 &&
-        radioIndex < radioPlaylist.length;
+        radioIndex >= 0 && radioIndex < radioPlaylist.length;
 
-      /*
-       * CURRENT TRACK EXISTS.
-       *
-       * Do not choose another track.
-       */
+      if (!validIndex) {
+        const played = new Set(playedKeys);
 
-      if (validIndex) {
-        const audio = audioRef.current;
-
-        /*
-         * If already playing, simply keep playing it.
-         */
-
-        if (audio && !audio.paused) {
-          setRadioPlaying(true);
-          return true;
-        }
-
-        /*
-         * Otherwise resume the SAME track.
-         */
-
-        return playTrack(
-          radioIndex,
-          userInitiated
-        );
-      }
-
-      /*
-       * ONLY choose a random track when the station
-       * has never selected a current track.
-       */
-
-      const played = new Set(playedKeys);
-
-      const recent = new Set(
-        radioHistory
-          .slice(0, 8)
-          .map(getTrackKey)
-      );
-
-      const fresh = radioPlaylist
-        .map((track, index) => ({
-          track,
-          index,
-          key: getTrackKey(track),
-        }))
-        .filter(
-          ({ key }) =>
-            !played.has(key) &&
-            !recent.has(key)
+        const recent = new Set(
+          radioHistory
+            .slice(0, 8)
+            .map((track) => getTrackKey(track))
         );
 
-      const pool = fresh.length
-        ? fresh
-        : radioPlaylist.map(
-            (track, index) => ({
+        const fresh = radioPlaylist
+          .map((track, index) => ({
+            track,
+            index,
+            key: getTrackKey(track),
+          }))
+          .filter(
+            ({ key }) => !played.has(key) && !recent.has(key)
+          );
+
+        const pool = fresh.length
+          ? fresh
+          : radioPlaylist.map((track, index) => ({
               track,
               index,
               key: getTrackKey(track),
-            })
+            }));
+
+        const chosen =
+          pool[Math.floor(Math.random() * pool.length)];
+
+        if (chosen) {
+          setPlayedKeys((current) =>
+            Array.from(new Set([...current, chosen.key])).slice(-200)
           );
 
-      const chosen =
-        pool[
-          Math.floor(
-            Math.random() * pool.length
-          )
-        ];
-
-      if (!chosen) {
-        return false;
+          return playTrack(chosen.index, userInitiated);
+        }
       }
 
-      setPlayedKeys((current) =>
-        Array.from(
-          new Set([
-            ...current,
-            chosen.key,
-          ])
-        ).slice(-200)
-      );
-
       return playTrack(
-        chosen.index,
+        validIndex ? radioIndex : 0,
         userInitiated
       );
     }
 
     /*
-     * ----------------------------------------------------------
-     * EXTERNAL LIVE STREAM MODE
-     * ----------------------------------------------------------
+     * Fallback for a true external live stream if the local
+     * playlist isn't available.
      */
-
-    if (
-      !radioStreamUrl ||
-      !audioRef.current
-    ) {
+    if (!radioStreamUrl || !audioRef.current) {
+      setRadioOpen(true);
       return false;
     }
 
-    const requestId =
-      ++playRequestRef.current;
+    if (userInitiated) {
+      setRadioPausedByUser(false);
+    }
 
-    const audio =
-      audioRef.current;
-
-    /*
-     * Do not reload an already-loaded stream.
-     */
+    const audio = audioRef.current;
 
     if (
-      loadedSrcRef.current !==
-        radioStreamUrl ||
+      loadedSrcRef.current !== radioStreamUrl ||
       !audio.src
     ) {
-      try {
-        audio.pause();
-      } catch {}
-
       audio.src = radioStreamUrl;
-      loadedSrcRef.current =
-        radioStreamUrl;
+      loadedSrcRef.current = radioStreamUrl;
 
       try {
         audio.load();
@@ -409,258 +257,165 @@ export default function App() {
     try {
       await audio.play();
 
-      if (
-        requestId !==
-        playRequestRef.current
-      ) {
-        return false;
-      }
-
       setRadioPlaying(true);
+      setRadioOpen(true);
 
       return true;
     } catch {
-      if (
-        requestId ===
-        playRequestRef.current
-      ) {
-        setRadioPlaying(false);
-      }
+      setRadioPlaying(false);
+      setRadioOpen(true);
 
       return false;
     }
   };
 
-  /*
-   * ------------------------------------------------------------
-   * PAUSE
-   * ------------------------------------------------------------
-   */
-
   const pauseRadio = () => {
-    clearRadioRetry();
+    if (retryTimerRef.current) {
+      clearTimeout(retryTimerRef.current);
+      retryTimerRef.current = null;
+    }
 
-    /*
-     * Invalidate pending play requests.
-     */
-
-    playRequestRef.current += 1;
-
-    try {
-      audioRef.current?.pause();
-    } catch {}
-
-    /*
-     * Do NOT reset currentTime.
-     */
+    audioRef.current?.pause();
 
     setRadioPlaying(false);
     setRadioPausedByUser(true);
   };
 
-  /*
-   * ------------------------------------------------------------
-   * PLAY / PAUSE ONLY
-   * ------------------------------------------------------------
-   *
-   * There is deliberately NO next or previous behavior.
-   */
-
   const toggleRadio = () => {
     if (radioPlaying) {
       pauseRadio();
-      return;
+    } else {
+      void startRadio(true);
     }
-
-    void startRadio(true);
   };
 
   /*
-   * ------------------------------------------------------------
-   * RADIO AUTOMATIC ADVANCEMENT
-   * ------------------------------------------------------------
+   * This is the important radio fix.
    *
-   * The ONLY normal mechanism allowed to change tracks.
+   * When a song ends we:
+   * 1. Record it as recently played.
+   * 2. Avoid immediate repeats.
+   * 3. Prefer another artist.
+   * 4. Try candidates one by one.
+   * 5. Wait for playTrack() to confirm playback.
+   * 6. If one file fails, immediately try another.
+   * 7. If everything temporarily fails, retry automatically.
    *
-   * This happens after the current song naturally ends.
+   * The station therefore doesn't simply die when one audio file
+   * or browser playback attempt fails.
    */
-
   const advanceRadio = async () => {
-    if (!radioPlaylist.length) {
-      return;
-    }
-
-    if (radioAdvancingRef.current) {
-      return;
-    }
-
-    if (radioPausedByUser) {
-      return;
-    }
+    if (!radioPlaylist.length) return;
+    if (radioAdvancingRef.current) return;
+    if (radioPausedByUser) return;
 
     radioAdvancingRef.current = true;
 
     try {
-      const current =
-        radioPlaylist[radioIndex] ||
-        radioTrack;
-
-      const currentKey =
-        getTrackKey(current);
+      const current = radioTrack;
+      const currentKey = getTrackKey(current);
 
       if (current.src) {
         const nextHistory = [
           current,
           ...radioHistory.filter(
-            (item) =>
-              getTrackKey(item) !==
-              currentKey
+            (item) => getTrackKey(item) !== currentKey
           ),
         ].slice(0, 8);
 
-        setRadioHistory(
-          nextHistory
-        );
+        setRadioHistory(nextHistory);
 
         try {
           localStorage.setItem(
             "ftc-radio-history",
-            JSON.stringify(
-              nextHistory
-            )
+            JSON.stringify(nextHistory)
           );
         } catch {}
       }
 
       let played = new Set(
-        [
-          ...playedKeys,
-          currentKey,
-        ].filter(Boolean)
+        [...playedKeys, currentKey].filter(Boolean)
       );
 
-      let candidates: RadioCandidate[] =
-        radioPlaylist
+      let candidates = radioPlaylist
+        .map((track, index) => ({
+          track,
+          index,
+          key: getTrackKey(track),
+        }))
+        .filter(
+          ({ key }) =>
+            key !== currentKey && !played.has(key)
+        );
+
+      /*
+       * The full library has been played.
+       * Start a fresh rotation rather than stopping.
+       */
+      if (!candidates.length) {
+        played = new Set([currentKey]);
+
+        setPlayedKeys(
+          currentKey ? [currentKey] : []
+        );
+
+        candidates = radioPlaylist
           .map((track, index) => ({
             track,
             index,
             key: getTrackKey(track),
           }))
-          .filter(
-            ({ key }) =>
-              key !== currentKey &&
-              !played.has(key)
-          );
-
-      /*
-       * Entire library has been heard.
-       * Start a fresh rotation.
-       */
-
-      if (!candidates.length) {
-        played = new Set(
-          currentKey
-            ? [currentKey]
-            : []
-        );
-
-        setPlayedKeys(
-          currentKey
-            ? [currentKey]
-            : []
-        );
-
-        candidates =
-          radioPlaylist
-            .map(
-              (
-                track,
-                index
-              ) => ({
-                track,
-                index,
-                key: getTrackKey(
-                  track
-                ),
-              })
-            )
-            .filter(
-              ({ key }) =>
-                key !==
-                currentKey
-            );
+          .filter(({ key }) => key !== currentKey);
       }
 
       /*
-       * Prefer a different artist from the current
-       * and most recent tracks.
+       * Avoid the same artist repeatedly when the library
+       * contains enough different artists.
        */
+      const recentArtists = new Set(
+        [current, ...radioHistory.slice(0, 2)]
+          .map(getArtistKey)
+          .filter(Boolean)
+      );
 
-      const recentArtists =
-        new Set(
-          [
-            current,
-            ...radioHistory.slice(
-              0,
-              2
-            ),
-          ]
-            .map(
-              getArtistKey
-            )
-            .filter(Boolean)
-        );
+      const differentArtist = candidates.filter(
+        ({ track }) =>
+          !recentArtists.has(getArtistKey(track))
+      );
 
-      const differentArtist =
-        candidates.filter(
-          ({ track }) =>
-            !recentArtists.has(
-              getArtistKey(
-                track
-              )
-            )
-        );
+      const pool = differentArtist.length
+        ? differentArtist
+        : candidates;
 
-      const pool =
-        differentArtist.length
-          ? differentArtist
-          : candidates;
-
-      const shuffled = [
-        ...pool,
-      ].sort(
-        () =>
-          Math.random() -
-          0.5
+      /*
+       * Shuffle candidates so the station doesn't always
+       * follow the exact same sequence.
+       */
+      const shuffled = [...pool].sort(
+        () => Math.random() - 0.5
       );
 
       let started = false;
 
       /*
-       * Try candidates until one successfully starts.
+       * Try tracks until one actually starts.
+       * This is the key protection against a dead radio.
        */
-
       for (const next of shuffled) {
-        if (radioPausedByUser) {
-          break;
-        }
+        if (radioPausedByUser) break;
 
-        const success =
-          await playTrack(
-            next.index
-          );
+        const success = await playTrack(next.index);
 
         if (success) {
           started = true;
 
-          setPlayedKeys(
-            (currentPlayed) =>
-              Array.from(
-                new Set([
-                  ...currentPlayed,
-                  next.key,
-                ])
-              ).slice(-200)
+          setPlayedKeys((currentPlayed) =>
+            Array.from(
+              new Set([
+                ...currentPlayed,
+                next.key,
+              ])
+            ).slice(-200)
           );
 
           break;
@@ -668,32 +423,22 @@ export default function App() {
       }
 
       /*
-       * Retry if all candidates failed.
+       * If every candidate failed, don't leave the listener
+       * with a dead player. Retry after a short delay.
        */
-
-      if (
-        !started &&
-        !radioPausedByUser
-      ) {
+      if (!started && !radioPausedByUser) {
         setRadioPlaying(false);
 
-        clearRadioRetry();
+        retryTimerRef.current = setTimeout(() => {
+          retryTimerRef.current = null;
 
-        retryTimerRef.current =
-          setTimeout(() => {
-            retryTimerRef.current =
-              null;
-
-            if (
-              !radioPausedByUser
-            ) {
-              void advanceRadio();
-            }
-          }, 1500);
+          if (!radioPausedByUser) {
+            void advanceRadio();
+          }
+        }, 1500);
       }
     } finally {
-      radioAdvancingRef.current =
-        false;
+      radioAdvancingRef.current = false;
     }
   };
 
@@ -706,145 +451,79 @@ export default function App() {
   useEffect(() => {
     let cancelled = false;
 
-    const base =
-      import.meta.env.BASE_URL ||
-      "/";
+    const base = import.meta.env.BASE_URL || "/";
 
     fetch(
-      `${base.replace(
-        /\/$/,
-        ""
-      )}/radio-config.json`,
-      {
-        cache: "force-cache",
-      }
+      `${base.replace(/\/$/, "")}/radio-config.json`,
+      { cache: "force-cache" }
     )
-      .then((response) =>
-        response.ok
-          ? response.json()
-          : null
-      )
+      .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (
           !cancelled &&
-          typeof data?.streamUrl ===
-            "string"
+          typeof data?.streamUrl === "string"
         ) {
-          setRadioStreamUrl(
-            data.streamUrl.trim()
-          );
+          setRadioStreamUrl(data.streamUrl.trim());
         }
       })
       .catch(() => {});
 
     fetch(
-      `${base.replace(
-        /\/$/,
-        ""
-      )}/radio-playlist.json`,
-      {
-        cache: "force-cache",
-      }
+      `${base.replace(/\/$/, "")}/radio-playlist.json`,
+      { cache: "force-cache" }
     )
-      .then((response) =>
-        response.ok
-          ? response.json()
-          : null
-      )
+      .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (
           cancelled ||
-          !Array.isArray(
-            data?.tracks
-          )
+          !Array.isArray(data?.tracks)
         ) {
           return;
         }
 
-        const tracks =
-          data.tracks.filter(
-            (track: Track) =>
-              typeof track?.src ===
-                "string" &&
-              Boolean(track.src)
-          );
-
-        if (!tracks.length) {
-          return;
-        }
-
-        setRadioPlaylist(
-          tracks
+        const tracks = data.tracks.filter(
+          (track: Track) =>
+            typeof track?.src === "string" &&
+            track.src
         );
 
-        /*
-         * Select an initial track.
-         *
-         * Do NOT play automatically.
-         */
+        if (!tracks.length) return;
+
+        setRadioPlaylist(tracks);
 
         setRadioIndex(() => {
-          const played =
-            new Set(
-              playedKeys
+          const played = new Set(playedKeys);
+
+          const recent = new Set(
+            radioHistory
+              .slice(0, 8)
+              .map((track) => getTrackKey(track))
+          );
+
+          const fresh = tracks
+            .map((track, index) => ({
+              track,
+              index,
+              key: getTrackKey(track),
+            }))
+            .filter(
+              ({ key }) =>
+                !played.has(key) &&
+                !recent.has(key)
             );
 
-          const recent =
-            new Set(
-              radioHistory
-                .slice(0, 8)
-                .map(
-                  getTrackKey
-                )
-            );
-
-          const fresh =
-            tracks
-              .map(
-                (
-                  track,
-                  index
-                ) => ({
-                  track,
-                  index,
-                  key: getTrackKey(
-                    track
-                  ),
-                })
-              )
-              .filter(
-                ({
-                  key,
-                }) =>
-                  !played.has(
-                    key
-                  ) &&
-                  !recent.has(
-                    key
-                  )
-              );
-
-          const pool =
-            fresh.length
-              ? fresh
-              : tracks.map(
-                  (
-                    track,
-                    index
-                  ) => ({
-                    track,
-                    index,
-                    key: getTrackKey(
-                      track
-                    ),
-                  })
-                );
+          const pool = fresh.length
+            ? fresh
+            : tracks.map((track, index) => ({
+                track,
+                index,
+                key: getTrackKey(track),
+              }));
 
           return (
             pool[
               Math.floor(
-                Math.random() *
-                  pool.length
+                Math.random() * pool.length
               )
             ]?.index ?? 0
           );
@@ -852,25 +531,16 @@ export default function App() {
       })
       .catch(() => {});
 
-    /*
-     * Restore radio history.
-     */
-
     try {
       const raw =
         localStorage.getItem(
           "ftc-radio-history"
         ) || "[]";
 
-      const value =
-        JSON.parse(raw);
+      const value = JSON.parse(raw);
 
-      if (
-        Array.isArray(value)
-      ) {
-        setRadioHistory(
-          value.slice(0, 8)
-        );
+      if (Array.isArray(value)) {
+        setRadioHistory(value.slice(0, 8));
       }
     } catch {}
 
@@ -879,56 +549,99 @@ export default function App() {
     };
   }, []);
 
-  /*
-   * Persist played-track rotation.
-   */
-
   useEffect(() => {
     try {
       localStorage.setItem(
         "ftc-radio-played-keys",
         JSON.stringify(
-          playedKeys.slice(
-            -200
-          )
+          playedKeys.slice(-200)
         )
       );
     } catch {}
   }, [playedKeys]);
 
-  /*
-   * Persist volume.
-   */
-
   useEffect(() => {
     if (audioRef.current) {
-      audioRef.current.volume =
-        radioVolume;
+      audioRef.current.volume = radioVolume;
     }
-
-    try {
-      localStorage.setItem(
-        "ftc-radio-volume",
-        String(
-          radioVolume
-        )
-      );
-    } catch {}
   }, [radioVolume]);
 
   /*
-   * Cleanup.
+   * ------------------------------------------------------------
+   * AUTOPLAY / FIRST USER GESTURE
+   * ------------------------------------------------------------
    */
 
   useEffect(() => {
+    if (
+      (!radioPlaylist.length && !radioStreamUrl) ||
+      radioPausedByUser
+    ) {
+      return;
+    }
+
+    const attempt = () => {
+      if (
+        !radioPausedByUser &&
+        !radioPlaying
+      ) {
+        void startRadio(false);
+      }
+    };
+
+    attempt();
+
+    const gesture = () => {
+      attempt();
+
+      window.removeEventListener(
+        "pointerdown",
+        gesture
+      );
+
+      window.removeEventListener(
+        "keydown",
+        gesture
+      );
+    };
+
+    window.addEventListener(
+      "pointerdown",
+      gesture,
+      { once: true }
+    );
+
+    window.addEventListener(
+      "keydown",
+      gesture,
+      { once: true }
+    );
+
     return () => {
-      clearRadioRetry();
+      window.removeEventListener(
+        "pointerdown",
+        gesture
+      );
 
-      playRequestRef.current += 1;
+      window.removeEventListener(
+        "keydown",
+        gesture
+      );
+    };
+  }, [
+    radioPlaylist,
+    radioStreamUrl,
+    radioPausedByUser,
+  ]);
 
-      try {
-        audioRef.current?.pause();
-      } catch {}
+  /*
+   * Clean up retry timer when the component disappears.
+   */
+  useEffect(() => {
+    return () => {
+      if (retryTimerRef.current) {
+        clearTimeout(retryTimerRef.current);
+      }
     };
   }, []);
 
@@ -940,57 +653,40 @@ export default function App() {
 
   useEffect(() => {
     let cancelled = false;
-
-    let timer:
-      | ReturnType<typeof setInterval>
-      | undefined;
+    let timer: ReturnType<typeof setInterval> | undefined;
 
     const loadFeed = async (
       loading = false
     ) => {
       if (loading) {
-        setFeedStatus(
-          "loading"
-        );
+        setFeedStatus("loading");
       }
 
       const base =
-        import.meta.env.BASE_URL ||
-        "/";
+        import.meta.env.BASE_URL || "/";
 
-      const staticUrl =
-        `${base.replace(
-          /\/$/,
-          ""
-        )}/editorial-feed.json`;
+      const staticUrl = `${base.replace(
+        /\/$/,
+        ""
+      )}/editorial-feed.json`;
 
       const fetchJson = async (
         url: string,
         cache: RequestCache
       ) => {
         try {
-          const response =
-            await fetch(
-              url,
-              {
-                headers: {
-                  Accept:
-                    "application/json",
-                },
-                cache,
-              }
-            );
+          const response = await fetch(url, {
+            headers: {
+              Accept: "application/json",
+            },
+            cache,
+          });
 
-          if (!response.ok) {
-            return null;
-          }
+          if (!response.ok) return null;
 
-          const data =
-            await response.json();
+          const data = await response.json();
 
-          return Array.isArray(
-            data?.stories
-          )
+          return Array.isArray(data?.stories)
             ? data
             : null;
         } catch {
@@ -998,66 +694,51 @@ export default function App() {
         }
       };
 
-      const [
-        staticData,
-        apiData,
-      ] = await Promise.all([
-        fetchJson(
-          staticUrl,
-          "default"
-        ),
-        fetchJson(
-          "/api/editorial-feed?limit=24",
-          "no-store"
-        ),
-      ]);
+      const [staticData, apiData] =
+        await Promise.all([
+          fetchJson(
+            staticUrl,
+            "default"
+          ),
+          fetchJson(
+            "/api/editorial-feed?limit=24",
+            "no-store"
+          ),
+        ]);
 
-      const merged =
-        Array.from(
-          new Map(
-            [
-              ...(staticData
-                ?.stories || []),
-              ...(apiData
-                ?.stories || []),
-            ].map(
-              (
-                story: Story,
-                index
-              ) => [
-                storyKey(
-                  story
-                ) ||
-                  `story-${index}`,
-                story,
-              ]
-            )
-          ).values()
-        )
-          .sort(
-            (a, b) =>
-              (Date.parse(
-                b.published_at ||
-                  ""
-              ) || 0) -
-              (Date.parse(
-                a.published_at ||
-                  ""
-              ) || 0)
+      const merged = Array.from(
+        new Map(
+          [
+            ...(staticData?.stories || []),
+            ...(apiData?.stories || []),
+          ].map(
+            (
+              story: Story,
+              index
+            ) => [
+              storyKey(story) ||
+                `story-${index}`,
+              story,
+            ]
           )
-          .slice(0, 24);
+        ).values()
+      )
+        .sort(
+          (a, b) =>
+            (Date.parse(
+              b.published_at || ""
+            ) || 0) -
+            (Date.parse(
+              a.published_at || ""
+            ) || 0)
+        )
+        .slice(0, 24);
 
-      if (cancelled) {
-        return;
-      }
+      if (cancelled) return;
 
       if (merged.length) {
-        setStories(
-          merged
-        );
-        setFeedStatus(
-          "ready"
-        );
+        setStories(merged);
+        setFeedStatus("ready");
       } else {
         setFeedStatus(
           staticData
@@ -1069,18 +750,14 @@ export default function App() {
 
     loadFeed(true);
 
-    timer =
-      setInterval(
-        () => {
-          if (
-            document.visibilityState ===
-            "visible"
-          ) {
-            loadFeed(false);
-          }
-        },
-        5 * 60 * 1000
-      );
+    timer = setInterval(() => {
+      if (
+        document.visibilityState ===
+        "visible"
+      ) {
+        loadFeed(false);
+      }
+    }, 5 * 60 * 1000);
 
     const refresh = () => {
       if (
@@ -1100,9 +777,7 @@ export default function App() {
       cancelled = true;
 
       if (timer) {
-        clearInterval(
-          timer
-        );
+        clearInterval(timer);
       }
 
       document.removeEventListener(
@@ -1119,25 +794,17 @@ export default function App() {
    */
 
   useEffect(() => {
-    if (!readerStory) {
-      return;
-    }
+    if (!readerStory) return;
 
     const close = (
       event: KeyboardEvent
     ) => {
-      if (
-        event.key ===
-        "Escape"
-      ) {
-        setReaderStory(
-          null
-        );
+      if (event.key === "Escape") {
+        setReaderStory(null);
       }
     };
 
-    document.body.style.overflow =
-      "hidden";
+    document.body.style.overflow = "hidden";
 
     window.addEventListener(
       "keydown",
@@ -1145,8 +812,7 @@ export default function App() {
     );
 
     return () => {
-      document.body.style.overflow =
-        "";
+      document.body.style.overflow = "";
 
       window.removeEventListener(
         "keydown",
@@ -1163,187 +829,123 @@ export default function App() {
 
   const hero = stories[0];
 
-  const latest =
-    stories.slice(1, 4);
+  const latest = stories.slice(1, 4);
 
-  const musicStories =
-    useMemo(() => {
-      const matching =
-        stories.filter(
-          (story) =>
-            /music|artist|album|single|afrobeats|hip-hop|song|release/i.test(
-              `${story.category || ""} ${storyTitle(
-                story
-              )} ${story.dek || ""}`
-            )
-        );
-
-      return [
-        ...matching,
-        ...stories.filter(
-          (story) =>
-            !matching.includes(
-              story
-            )
-        ),
-      ].slice(0, 3);
-    }, [stories]);
-
-  const cultureStories =
-    useMemo(() => {
-      const matching =
-        stories.filter(
-          (story) =>
-            /culture|fashion|art|style|creative|entertainment|film|media/i.test(
-              `${story.category || ""} ${storyTitle(
-                story
-              )} ${story.dek || ""}`
-            )
-        );
-
-      return [
-        ...matching,
-        ...stories.filter(
-          (story) =>
-            !matching.includes(
-              story
-            )
-        ),
-      ].slice(0, 3);
-    }, [stories]);
-
-  /*
-   * ------------------------------------------------------------
-   * UP NEXT
-   * ------------------------------------------------------------
-   *
-   * DISPLAY ONLY.
-   *
-   * No click action.
-   * No manual skipping.
-   */
-
-  const upNextTracks =
-    useMemo(() => {
-      if (
-        !radioPlaylist.length
-      ) {
-        return [];
-      }
-
-      const currentKey =
-        getTrackKey(
-          radioTrack
-        );
-
-      const recentKeys =
-        new Set([
-          currentKey,
-          ...radioHistory
-            .slice(0, 5)
-            .map(
-              getTrackKey
-            ),
-          ...playedKeys.slice(
-            -10
-          ),
-        ]);
-
-      const preferred =
-        radioPlaylist
-          .map(
-            (
-              track,
-              index
-            ) => ({
-              track,
-              index,
-              key: getTrackKey(
-                track
-              ),
-            })
-          )
-          .filter(
-            ({ key }) =>
-              !recentKeys.has(
-                key
-              )
-          );
-
-      const fallback =
-        radioPlaylist
-          .map(
-            (
-              track,
-              index
-            ) => ({
-              track,
-              index,
-              key: getTrackKey(
-                track
-              ),
-            })
-          )
-          .filter(
-            ({ key }) =>
-              key !==
-              currentKey
-          );
-
-      return (
-        preferred.length
-          ? preferred
-          : fallback
-      ).slice(0, 4);
-    }, [
-      radioPlaylist,
-      radioTrack,
-      radioHistory,
-      playedKeys,
-    ]);
-
-  const searchResults =
-    useMemo(() => {
-      if (
-        !searchTerm.trim()
-      ) {
-        return stories.slice(
-          0,
-          6
-        );
-      }
-
-      const term =
-        searchTerm.toLowerCase();
-
-      return stories
-        .filter((story) =>
-          `${storyTitle(
-            story
-          )} ${
-            story.category ||
-            ""
-          } ${
-            story.dek || ""
-          } ${
-            story.source_name ||
-            ""
-          }`
-            .toLowerCase()
-            .includes(term)
+  const musicStories = useMemo(() => {
+    const matching = stories.filter(
+      (story) =>
+        /music|artist|album|single|afrobeats|hip-hop|song|release/i.test(
+          `${story.category || ""} ${
+            storyTitle(story)
+          } ${story.dek || ""}`
         )
-        .slice(0, 8);
-    }, [
-      stories,
-      searchTerm,
+    );
+
+    return [
+      ...matching,
+      ...stories.filter(
+        (story) => !matching.includes(story)
+      ),
+    ].slice(0, 3);
+  }, [stories]);
+
+  const cultureStories = useMemo(() => {
+    const matching = stories.filter(
+      (story) =>
+        /culture|fashion|art|style|creative|entertainment|film|media/i.test(
+          `${story.category || ""} ${
+            storyTitle(story)
+          } ${story.dek || ""}`
+        )
+    );
+
+    return [
+      ...matching,
+      ...stories.filter(
+        (story) => !matching.includes(story)
+      ),
+    ].slice(0, 3);
+  }, [stories]);
+
+  const upNextTracks = useMemo(() => {
+    if (!radioPlaylist.length) return [];
+
+    const currentKey =
+      getTrackKey(radioTrack);
+
+    const recentKeys = new Set([
+      currentKey,
+      ...radioHistory
+        .slice(0, 5)
+        .map(getTrackKey),
+      ...playedKeys.slice(-10),
     ]);
+
+    const preferred = radioPlaylist
+      .map((track, index) => ({
+        track,
+        index,
+        key: getTrackKey(track),
+      }))
+      .filter(
+        ({ key }) =>
+          !recentKeys.has(key)
+      );
+
+    const fallback = radioPlaylist
+      .map((track, index) => ({
+        track,
+        index,
+        key: getTrackKey(track),
+      }))
+      .filter(
+        ({ key }) =>
+          key !== currentKey
+      );
+
+    return (
+      preferred.length
+        ? preferred
+        : fallback
+    ).slice(0, 4);
+  }, [
+    radioPlaylist,
+    radioTrack,
+    radioHistory,
+    playedKeys,
+  ]);
+
+  const searchResults = useMemo(() => {
+    if (!searchTerm.trim()) {
+      return stories.slice(0, 6);
+    }
+
+    const term =
+      searchTerm.toLowerCase();
+
+    return stories
+      .filter((story) =>
+        `${storyTitle(story)} ${
+          story.category || ""
+        } ${story.dek || ""} ${
+          story.source_name || ""
+        }`
+          .toLowerCase()
+          .includes(term)
+      )
+      .slice(0, 8);
+  }, [stories, searchTerm]);
+
+  const safeImage = (
+    story: Story | undefined
+  ) =>
+    storyImage(story) ||
+    cultureArt;
 
   const openStory = (
     story: Story
   ) => {
-    setReaderStory(
-      story
-    );
+    setReaderStory(story);
   };
 
   const submitNewsletter = (
@@ -1351,11 +953,7 @@ export default function App() {
   ) => {
     event.preventDefault();
 
-    if (
-      !newsletterEmail.includes(
-        "@"
-      )
-    ) {
+    if (!newsletterEmail.includes("@")) {
       setNewsletterMessage(
         "Enter a valid email address."
       );
@@ -1371,36 +969,6 @@ export default function App() {
 
   /*
    * ------------------------------------------------------------
-   * RADIO DISPLAY HELPERS
-   * ------------------------------------------------------------
-   */
-
-  const radioPoster =
-    radioTrack.poster
-      ? `${
-          (
-            import.meta.env
-              .BASE_URL ||
-            "/"
-          ).replace(
-            /\/$/,
-            ""
-          )
-        }/${radioTrack.poster.replace(
-          /^\//,
-          ""
-        )}`
-      : cultureArt;
-
-  const radioStatus =
-    radioPlaying
-      ? "● ON AIR"
-      : radioPausedByUser
-      ? "RADIO PAUSED"
-      : "FOR THE CULTURE RADIO";
-
-  /*
-   * ------------------------------------------------------------
    * RENDER
    * ------------------------------------------------------------
    */
@@ -1410,50 +978,45 @@ export default function App() {
       <audio
         ref={audioRef}
         preload="none"
-        playsInline
         onEnded={() => {
-          if (
-            !radioPausedByUser
-          ) {
-            void advanceRadio();
-          }
+          void advanceRadio();
         }}
-        onPlay={() => {
-          setRadioPlaying(
-            true
-          );
-        }}
-        onPause={() => {
-          setRadioPlaying(
-            false
-          );
-        }}
+        onPlay={() =>
+          setRadioPlaying(true)
+        }
+        onPause={() =>
+          setRadioPlaying(false)
+        }
         onError={() => {
-          setRadioPlaying(
-            false
-          );
+          setRadioPlaying(false);
 
+          /*
+           * If a file fails while the station is live,
+           * immediately move to another track instead
+           * of leaving the station dead.
+           */
           if (
-            radioPausedByUser ||
-            !radioPlaylist.length ||
-            radioAdvancingRef.current
+            !radioPausedByUser &&
+            radioPlaylist.length &&
+            !radioAdvancingRef.current
           ) {
-            return;
+            if (retryTimerRef.current) {
+              clearTimeout(
+                retryTimerRef.current
+              );
+            }
+
+            retryTimerRef.current =
+              setTimeout(() => {
+                retryTimerRef.current = null;
+
+                if (
+                  !radioPausedByUser
+                ) {
+                  void advanceRadio();
+                }
+              }, 500);
           }
-
-          clearRadioRetry();
-
-          retryTimerRef.current =
-            setTimeout(() => {
-              retryTimerRef.current =
-                null;
-
-              if (
-                !radioPausedByUser
-              ) {
-                void advanceRadio();
-              }
-            }, 500);
         }}
       />
 
@@ -1478,9 +1041,7 @@ export default function App() {
 
         <nav
           className={`main-nav ${
-            menuOpen
-              ? "is-open"
-              : ""
+            menuOpen ? "is-open" : ""
           }`}
           aria-label="Primary navigation"
         >
@@ -1510,9 +1071,7 @@ export default function App() {
                 }
                 href={href}
                 onClick={() =>
-                  setMenuOpen(
-                    false
-                  )
+                  setMenuOpen(false)
                 }
               >
                 {label}
@@ -1527,8 +1086,7 @@ export default function App() {
             className="icon-button"
             onClick={() =>
               setSearchOpen(
-                (value) =>
-                  !value
+                (value) => !value
               )
             }
             aria-label="Search"
@@ -1540,16 +1098,8 @@ export default function App() {
             type="button"
             className="live-pill"
             onClick={() => {
-              /*
-               * IMPORTANT:
-               *
-               * This only starts/resumes the
-               * existing current track.
-               * It does NOT select a new track.
-               */
-              void startRadio(
-                true
-              );
+              setRadioOpen(true);
+              void startRadio(true);
             }}
           >
             ● LIVE RADIO
@@ -1560,8 +1110,7 @@ export default function App() {
             className="menu-button"
             onClick={() =>
               setMenuOpen(
-                (value) =>
-                  !value
+                (value) => !value
               )
             }
             aria-label="Toggle menu"
@@ -1576,15 +1125,10 @@ export default function App() {
           <div className="search-inner">
             <input
               autoFocus
-              value={
-                searchTerm
-              }
-              onChange={(
-                event
-              ) =>
+              value={searchTerm}
+              onChange={(event) =>
                 setSearchTerm(
-                  event.target
-                    .value
+                  event.target.value
                 )
               }
               placeholder="Search news, music, culture…"
@@ -1594,14 +1138,10 @@ export default function App() {
             <button
               type="button"
               onClick={() => {
-                setSearchOpen(
-                  false
-                );
+                setSearchOpen(false);
 
                 document
-                  .querySelector(
-                    "#news"
-                  )
+                  .querySelector("#news")
                   ?.scrollIntoView({
                     behavior:
                       "smooth",
@@ -1615,9 +1155,7 @@ export default function App() {
               <div className="search-results">
                 {searchResults.length ? (
                   searchResults.map(
-                    (
-                      story
-                    ) => (
+                    (story) => (
                       <button
                         key={storyKey(
                           story
@@ -1679,15 +1217,11 @@ export default function App() {
                 type="button"
                 className="primary-button"
                 onClick={() => {
-                  void startRadio(
-                    true
-                  );
+                  setRadioOpen(true);
+                  void startRadio(true);
                 }}
               >
-                ▶{" "}
-                {radioPlaying
-                  ? "PLAYING LIVE"
-                  : "LISTEN LIVE"}
+                ▶ LISTEN LIVE
               </button>
 
               <a
@@ -1703,17 +1237,14 @@ export default function App() {
               aria-hidden="true"
             >
               {Array.from(
-                {
-                  length: 34,
-                },
+                { length: 34 },
                 (_, index) => (
                   <i
                     key={index}
                     style={{
                       height: `${
                         18 +
-                        ((index *
-                          29) %
+                        ((index * 29) %
                           70)
                       }%`,
                     }}
@@ -1737,9 +1268,7 @@ export default function App() {
               <br />
               THE
               <br />
-              <strong>
-                CULTURE
-              </strong>
+              <strong>CULTURE</strong>
             </div>
           </div>
 
@@ -1759,15 +1288,11 @@ export default function App() {
                   type="button"
                   className="hero-story-button"
                   onClick={() =>
-                    openStory(
-                      hero
-                    )
+                    openStory(hero)
                   }
                 >
                   <h2>
-                    {storyTitle(
-                      hero
-                    )}
+                    {storyTitle(hero)}
                   </h2>
                 </button>
 
@@ -1789,9 +1314,7 @@ export default function App() {
                   type="button"
                   className="text-link"
                   onClick={() =>
-                    openStory(
-                      hero
-                    )
+                    openStory(hero)
                   }
                 >
                   READ STORY →
@@ -1818,30 +1341,19 @@ export default function App() {
           </aside>
         </section>
 
-        {/* ----------------------------------------------------
-            RADIO NOW PLAYING BAR
-        ----------------------------------------------------- */}
-
         <section
           className="now-playing-bar"
           id="radio"
-          aria-label="For the Culture live radio"
         >
           <div className="now-art">
             <img
-              src={radioPoster}
+              src={safeImage(undefined)}
               alt="For the Culture Radio"
-              onError={(event) => {
-                event.currentTarget.src =
-                  cultureArt;
-              }}
             />
           </div>
 
           <div className="now-copy">
-            <span>
-              {radioStatus}
-            </span>
+            <span>NOW PLAYING</span>
 
             <strong>
               {radioTrack.artist}
@@ -1850,72 +1362,47 @@ export default function App() {
             <small>
               {radioTrack.title}
             </small>
-
-            {(radioTrack.show ||
-              radioTrack.host ||
-              radioTrack.genre) && (
-              <div className="now-program">
-                {radioTrack.show && (
-                  <span>
-                    {radioTrack.show}
-                  </span>
-                )}
-
-                {radioTrack.host && (
-                  <span>
-                    WITH{" "}
-                    {radioTrack.host}
-                  </span>
-                )}
-
-                {radioTrack.genre && (
-                  <span>
-                    {radioTrack.genre}
-                  </span>
-                )}
-              </div>
-            )}
           </div>
 
-          <div className="now-control-group">
-            <button
-              type="button"
-              className="round-control"
-              onClick={
-                toggleRadio
-              }
-              aria-label={
-                radioPlaying
-                  ? "Pause radio"
-                  : "Play radio"
-              }
-            >
-              {radioPlaying
-                ? "Ⅱ"
-                : "▶"}
-            </button>
+          <button
+            type="button"
+            className="round-control"
+            onClick={toggleRadio}
+            aria-label={
+              radioPlaying
+                ? "Pause radio"
+                : "Play radio"
+            }
+          >
+            {radioPlaying
+              ? "Ⅱ"
+              : "▶"}
+          </button>
 
-            <span className="station-label">
-              LIVE
-            </span>
-          </div>
+          <button
+            type="button"
+            className="skip-control"
+            onClick={() =>
+              void advanceRadio()
+            }
+            aria-label="Next track"
+          >
+            ▶|
+          </button>
 
           <div
             className="bar-wave"
             aria-hidden="true"
           >
             {Array.from(
-              {
-                length: 24,
-              },
+              { length: 24 },
               (_, index) => (
                 <i
                   key={index}
                   style={{
                     height: `${
                       20 +
-                      ((index *
-                        13) %
+                      ((index * 13) %
                         70)
                     }%`,
                   }}
@@ -1924,47 +1411,20 @@ export default function App() {
             )}
           </div>
 
-          <div className="now-meta">
-            <span className="quality">
-              128 KBPS
-            </span>
+          <span className="quality">
+            128 KBPS
+          </span>
 
-            <label className="compact-volume">
-              <span>
-                VOL
-              </span>
-
-              <input
-                aria-label="Radio volume"
-                type="range"
-                min="0"
-                max="1"
-                step="0.01"
-                value={
-                  radioVolume
-                }
-                onChange={(
-                  event
-                ) =>
-                  setRadioVolume(
-                    Number(
-                      event.target
-                        .value
-                    )
-                  )
-                }
-              />
-            </label>
-
-            <span className="radio-auto-label">
-              AUTO
-            </span>
-          </div>
+          <button
+            type="button"
+            className="expand-radio"
+            onClick={() =>
+              setRadioOpen(true)
+            }
+          >
+            OPEN RADIO ↗
+          </button>
         </section>
-
-        {/* ----------------------------------------------------
-            NEWS
-        ----------------------------------------------------- */}
 
         <section
           className="content-section"
@@ -1992,24 +1452,21 @@ export default function App() {
                     {
                       headline:
                         "The culture is always moving.",
-                      dek:
-                        "Your latest stories will appear here.",
+                      dek: "Your latest stories will appear here.",
                       category:
                         "CULTURE",
                     },
                     {
                       headline:
                         "Music. Culture. Entertainment.",
-                      dek:
-                        "Discover the voices shaping the moment.",
+                      dek: "Discover the voices shaping the moment.",
                       category:
                         "MUSIC",
                     },
                     {
                       headline:
                         "FOR THE CULTURE ORIGINALS",
-                      dek:
-                        "Original conversations, sessions and stories are coming into focus.",
+                      dek: "Original conversations, sessions and stories are coming into focus.",
                       category:
                         "ORIGINALS",
                     },
@@ -2088,10 +1545,6 @@ export default function App() {
           </div>
         </section>
 
-        {/* ----------------------------------------------------
-            LATEST
-        ----------------------------------------------------- */}
-
         <section
           className="content-section split-section"
           id="news-grid"
@@ -2120,70 +1573,72 @@ export default function App() {
 
           <div className="latest-layout">
             <div className="latest-list">
-              {stories
-                .slice(0, 6)
-                .map(
-                  (
-                    story,
-                    index
-                  ) => (
-                    <button
-                      type="button"
-                      className="latest-row"
-                      key={storyKey(
+              {(
+                stories.length
+                  ? stories.slice(0, 6)
+                  : []
+              ).map(
+                (
+                  story,
+                  index
+                ) => (
+                  <button
+                    type="button"
+                    className="latest-row"
+                    key={storyKey(
+                      story
+                    )}
+                    onClick={() =>
+                      openStory(
+                        story
+                      )
+                    }
+                  >
+                    <span className="latest-number">
+                      {String(
+                        index + 1
+                      ).padStart(
+                        2,
+                        "0"
+                      )}
+                    </span>
+
+                    <img
+                      src={safeImage(
                         story
                       )}
-                      onClick={() =>
-                        openStory(
-                          story
-                        )
-                      }
-                    >
-                      <span className="latest-number">
-                        {String(
-                          index + 1
-                        ).padStart(
-                          2,
-                          "0"
+                      alt=""
+                      loading="lazy"
+                    />
+
+                    <span className="latest-text">
+                      <small>
+                        {(
+                          story.category ||
+                          "CULTURE"
+                        ).toUpperCase()}{" "}
+                        ·{" "}
+                        {formatDate(
+                          story.published_at
                         )}
-                      </span>
+                      </small>
 
-                      <img
-                        src={safeImage(
+                      <strong>
+                        {storyTitle(
                           story
                         )}
-                        alt=""
-                        loading="lazy"
-                      />
+                      </strong>
 
-                      <span className="latest-text">
-                        <small>
-                          {(
-                            story.category ||
-                            "CULTURE"
-                          ).toUpperCase()}{" "}
-                          ·{" "}
-                          {formatDate(
-                            story.published_at
-                          )}
-                        </small>
-
-                        <strong>
-                          {storyTitle(
-                            story
-                          )}
-                        </strong>
-
-                        <span>
-                          {story.dek ||
-                            "Fresh from the culture radar."}
-                        </span>
+                      <span>
+                        {story.dek ||
+                          "Fresh from the culture radar."}
                       </span>
+                    </span>
 
-                      <b>↗</b>
-                    </button>
-                  )
-                )}
+                    <b>↗</b>
+                  </button>
+                )
+              )}
 
               {!stories.length && (
                 <div className="empty-feed">
@@ -2213,52 +1668,54 @@ export default function App() {
                 <b>03</b>
               </div>
 
-              {stories
-                .slice(0, 3)
-                .map(
-                  (
-                    story,
-                    index
-                  ) => (
-                    <button
-                      type="button"
-                      key={storyKey(
+              {(
+                stories.length
+                  ? stories.slice(0, 3)
+                  : []
+              ).map(
+                (
+                  story,
+                  index
+                ) => (
+                  <button
+                    type="button"
+                    key={storyKey(
+                      story
+                    )}
+                    onClick={() =>
+                      openStory(
+                        story
+                      )
+                    }
+                  >
+                    <span>
+                      {index + 1}
+                    </span>
+
+                    <img
+                      src={safeImage(
                         story
                       )}
-                      onClick={() =>
-                        openStory(
-                          story
-                        )
-                      }
-                    >
-                      <span>
-                        {index + 1}
-                      </span>
+                      alt=""
+                    />
 
-                      <img
-                        src={safeImage(
+                    <div>
+                      <strong>
+                        {storyTitle(
                           story
                         )}
-                        alt=""
-                      />
+                      </strong>
 
-                      <div>
-                        <strong>
-                          {storyTitle(
-                            story
-                          )}
-                        </strong>
-
-                        <small>
-                          {(
-                            story.category ||
-                            "CULTURE"
-                          ).toUpperCase()}
-                        </small>
-                      </div>
-                    </button>
-                  )
-                )}
+                      <small>
+                        {(
+                          story.category ||
+                          "CULTURE"
+                        ).toUpperCase()}
+                      </small>
+                    </div>
+                  </button>
+                )
+              )}
 
               {!stories.length && (
                 <p className="trend-empty">
@@ -2272,10 +1729,6 @@ export default function App() {
             </aside>
           </div>
         </section>
-
-        {/* ----------------------------------------------------
-            MUSIC
-        ----------------------------------------------------- */}
 
         <section
           className="content-section"
@@ -2374,10 +1827,6 @@ export default function App() {
           </div>
         </section>
 
-        {/* ----------------------------------------------------
-            ENTERTAINMENT
-        ----------------------------------------------------- */}
-
         <section
           className="content-section"
           id="entertainment"
@@ -2413,9 +1862,7 @@ export default function App() {
               )
               .slice(0, 4)
               .map(
-                (
-                  story
-                ) => (
+                (story) => (
                   <article
                     key={storyKey(
                       story
@@ -2462,10 +1909,6 @@ export default function App() {
           </div>
         </section>
 
-        {/* ----------------------------------------------------
-            RADIO FEATURE
-        ----------------------------------------------------- */}
-
         <section
           className="radio-feature"
           aria-label="For the Culture live radio"
@@ -2489,9 +1932,7 @@ export default function App() {
             <h2>
               THE SOUND
               <br />
-              <em>
-                NEVER STOPS.
-              </em>
+              <em>NEVER STOPS.</em>
             </h2>
 
             <p>
@@ -2513,9 +1954,8 @@ export default function App() {
                 type="button"
                 className="primary-button"
                 onClick={() => {
-                  void startRadio(
-                    true
-                  );
+                  setRadioOpen(true);
+                  void startRadio(true);
                 }}
               >
                 ▶{" "}
@@ -2534,59 +1974,35 @@ export default function App() {
           </div>
 
           <div className="radio-side">
-            <div className="radio-side-heading">
-              <span>
-                UP NEXT
-              </span>
-
-              <small>
-                STATION ROTATION
-              </small>
-            </div>
+            <span>UP NEXT</span>
 
             {upNextTracks.map(
               ({
                 track,
                 index,
               }) => (
-                /*
-                 * DISPLAY ONLY.
-                 *
-                 * This is deliberately NOT a button.
-                 *
-                 * The listener cannot manually
-                 * jump forward.
-                 */
-                <div
-                  className="up-next-track"
+                <button
+                  type="button"
                   key={`${track.src}-${index}`}
+                  onClick={() =>
+                    void playTrack(
+                      index,
+                      true
+                    )
+                  }
                 >
                   <img
                     src={
                       track.poster
                         ? `${
-                            (
-                              import.meta
-                                .env
-                                .BASE_URL ||
-                              "/"
-                            ).replace(
-                              /\/$/,
-                              ""
-                            )
-                          }/${track.poster.replace(
-                            /^\//,
-                            ""
-                          )}`
+                            import.meta
+                              .env
+                              .BASE_URL ||
+                            "/"
+                          }${track.poster}`
                         : cultureArt
                     }
                     alt=""
-                    onError={(
-                      event
-                    ) => {
-                      event.currentTarget.src =
-                        cultureArt;
-                    }}
                   />
 
                   <div>
@@ -2599,27 +2015,12 @@ export default function App() {
                     </small>
                   </div>
 
-                  <span className="up-next-status">
-                    QUEUED
-                  </span>
-                </div>
+                  <b>▶</b>
+                </button>
               )
             )}
-
-            {!upNextTracks.length &&
-              radioPlaylist.length > 0 && (
-                <div className="radio-side-empty">
-                  <small>
-                    ROTATION LOADING
-                  </small>
-                </div>
-              )}
           </div>
         </section>
-
-        {/* ----------------------------------------------------
-            CULTURE
-        ----------------------------------------------------- */}
 
         <section
           className="content-section"
@@ -2643,9 +2044,7 @@ export default function App() {
 
           <div className="culture-grid">
             {cultureStories.map(
-              (
-                story
-              ) => (
+              (story) => (
                 <article
                   key={storyKey(
                     story
@@ -2707,10 +2106,6 @@ export default function App() {
             )}
           </div>
         </section>
-
-        {/* ----------------------------------------------------
-            ORIGINALS
-        ----------------------------------------------------- */}
 
         <section
           className="originals-section"
@@ -2777,9 +2172,7 @@ export default function App() {
                         )
                       }
                     >
-                      <span>
-                        ▶
-                      </span>
+                      <span>▶</span>
 
                       <div>
                         <small>
@@ -2816,10 +2209,6 @@ export default function App() {
           </div>
         </section>
 
-        {/* ----------------------------------------------------
-            EVENTS
-        ----------------------------------------------------- */}
-
         <section
           className="events-section"
           id="events"
@@ -2842,13 +2231,8 @@ export default function App() {
 
           <div className="events-card">
             <div className="event-date">
-              <strong>
-                FTC
-              </strong>
-
-              <span>
-                LIVE
-              </span>
+              <strong>FTC</strong>
+              <span>LIVE</span>
             </div>
 
             <div>
@@ -2882,10 +2266,6 @@ export default function App() {
           </div>
         </section>
 
-        {/* ----------------------------------------------------
-            NEWSLETTER
-        ----------------------------------------------------- */}
-
         <section className="newsletter-section">
           <div>
             <span className="eyebrow">
@@ -2904,21 +2284,14 @@ export default function App() {
           </div>
 
           <form
-            onSubmit={
-              submitNewsletter
-            }
+            onSubmit={submitNewsletter}
           >
             <input
               type="email"
-              value={
-                newsletterEmail
-              }
-              onChange={(
-                event
-              ) =>
+              value={newsletterEmail}
+              onChange={(event) =>
                 setNewsletterEmail(
-                  event.target
-                    .value
+                  event.target.value
                 )
               }
               placeholder="Enter your email"
@@ -2972,10 +2345,6 @@ export default function App() {
         </section>
       </main>
 
-      {/* ------------------------------------------------------
-          FOOTER
-      ------------------------------------------------------- */}
-
       <footer className="site-footer">
         <div className="footer-brand">
           <span className="brand-main">
@@ -3003,53 +2372,39 @@ export default function App() {
 
         <div className="footer-links">
           <div>
-            <span>
-              EXPLORE
-            </span>
-
+            <span>EXPLORE</span>
             <a href="#radio">
               Radio
             </a>
-
             <a href="#news">
               News
             </a>
-
             <a href="#music">
               Music
             </a>
-
             <a href="#videos">
               Videos
             </a>
           </div>
 
           <div>
-            <span>
-              DISCOVER
-            </span>
-
+            <span>DISCOVER</span>
             <a href="#culture">
               Culture
             </a>
-
             <a href="#events">
               Events
             </a>
-
             <a href="#top">
               About
             </a>
-
             <a href="mailto:fortheculture184@gmail.com">
               Contact
             </a>
           </div>
 
           <div>
-            <span>
-              SUPPORT
-            </span>
+            <span>SUPPORT</span>
 
             <a
               href="https://www.instagram.com/forthecultureondy/?hl=en"
@@ -3082,7 +2437,6 @@ export default function App() {
           what we consume.
           <br />
           It’s what we create.”
-
           <cite>
             — FOR THE CULTURE
           </cite>
@@ -3101,18 +2455,83 @@ export default function App() {
         </div>
       </footer>
 
-      {/* ------------------------------------------------------
-          IMPORTANT:
-          THE LARGE RADIO DRAWER HAS BEEN COMPLETELY REMOVED.
-          
-          There is NO radio-drawer JSX here.
-          The compact now-playing bar above is now the
-          ONLY radio player interface.
-      ------------------------------------------------------- */}
+      <div
+        className={`radio-drawer ${
+          radioOpen
+            ? "is-open"
+            : ""
+        }`}
+        role="dialog"
+        aria-label="For the Culture radio player"
+        aria-modal="false"
+      >
+        <div className="drawer-art">
+          <img
+            src={cultureArt}
+            alt="For the Culture Radio"
+          />
+        </div>
 
-      {/* ------------------------------------------------------
-          STORY READER
-      ------------------------------------------------------- */}
+        <div className="drawer-main">
+          <div className="drawer-top">
+            <span>
+              {radioPlaying
+                ? "● LIVE"
+                : "FOR THE CULTURE RADIO"}
+            </span>
+
+            <button
+              type="button"
+              onClick={() =>
+                setRadioOpen(false)
+              }
+              aria-label="Close radio"
+            >
+              ×
+            </button>
+          </div>
+
+          <strong>
+            {radioTrack.artist}
+          </strong>
+
+          <small>
+            {radioTrack.title}
+          </small>
+
+          <div className="drawer-controls">
+            <button
+              type="button"
+              className="round-control"
+              onClick={toggleRadio}
+            >
+              {radioPlaying
+                ? "Ⅱ"
+                : "▶"}
+            </button>
+
+            <input
+              aria-label="Radio volume"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={radioVolume}
+              onChange={(event) =>
+                setRadioVolume(
+                  Number(
+                    event.target.value
+                  )
+                )
+              }
+            />
+
+            <span>
+              128 KBPS
+            </span>
+          </div>
+        </div>
+      </div>
 
       {readerStory && (
         <div
@@ -3125,9 +2544,7 @@ export default function App() {
             type="button"
             className="reader-backdrop"
             onClick={() =>
-              setReaderStory(
-                null
-              )
+              setReaderStory(null)
             }
             aria-label="Close story"
           />
@@ -3137,9 +2554,7 @@ export default function App() {
               type="button"
               className="reader-close"
               onClick={() =>
-                setReaderStory(
-                  null
-                )
+                setReaderStory(null)
               }
               aria-label="Close"
             >
@@ -3193,19 +2608,13 @@ export default function App() {
                   readerStory.dek ||
                   "This story is available through the FTC editorial feed."
                 )
-                  .split(
-                    /\n+/
-                  )
+                  .split(/\n+/)
                   .map(
                     (
                       paragraph,
                       index
                     ) => (
-                      <p
-                        key={
-                          index
-                        }
-                      >
+                      <p key={index}>
                         {paragraph}
                       </p>
                     )
