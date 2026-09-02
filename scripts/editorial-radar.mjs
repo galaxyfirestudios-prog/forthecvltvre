@@ -5,28 +5,54 @@ const require = createRequire(import.meta.url)
 const { draftStoriesWithGemini, DEFAULT_MODEL } = require('../lib/gemini-editorial.cjs')
 
 const SOURCES = [
-  { name: 'The NATIVE', url: process.env.EDITORIAL_NATIVE_FEED || 'https://thenativemag.com/feed/', weight: 12 },
-  { name: 'The NATIVE Music', url: process.env.EDITORIAL_NATIVE_MUSIC_FEED || 'https://thenativemag.com/category/music/feed/', weight: 14 },
+  // Music / culture
+  { name: 'The NATIVE', url: process.env.EDITORIAL_NATIVE_FEED || 'https://thenativemag.com/feed/', weight: 14 },
+  { name: 'The NATIVE Music', url: process.env.EDITORIAL_NATIVE_MUSIC_FEED || 'https://thenativemag.com/category/music/feed/', weight: 15 },
   { name: 'NotJustOk', url: process.env.EDITORIAL_NOTJUSTOK_FEED || 'https://notjustok.com/feed/', weight: 13 },
   { name: 'tooXclusive', url: process.env.EDITORIAL_TOOXCLUSIVE_FEED || 'https://tooxclusive.com/feed/', weight: 11 },
-  { name: 'Naijaloaded', url: process.env.EDITORIAL_NAIJALOADED_FEED || 'https://www.naijaloaded.com.ng/feed/', weight: 9 },
-  { name: 'PUNCH Entertainment', url: 'https://rss.punchng.com/v1/category/entertainment', weight: 8 },
+  { name: 'Naijaloaded', url: process.env.EDITORIAL_NAIJALOADED_FEED || 'https://www.naijaloaded.com.ng/feed/', weight: 10 },
+  // Nigerian news
+  { name: 'PUNCH Latest News', url: 'https://rss.punchng.com/v1/category/latest_news', weight: 10 },
+  { name: 'PUNCH Entertainment', url: 'https://rss.punchng.com/v1/category/entertainment', weight: 11 },
+  { name: 'PUNCH Business', url: 'https://rss.punchng.com/v1/category/business', weight: 9 },
+  { name: 'PUNCH Technology', url: 'https://rss.punchng.com/v1/category/technology', weight: 8 },
+  { name: 'PUNCH Sports', url: 'https://rss.punchng.com/v1/category/sports', weight: 8 },
   { name: 'PUNCH Interviews', url: 'https://rss.punchng.com/v1/category/interview', weight: 8 },
-  { name: 'PUNCH Special Features', url: 'https://rss.punchng.com/v1/category/special_feature', weight: 7 },
-  { name: 'PUNCH Videos', url: 'https://rss.punchng.com/v1/category/videos', weight: 5 },
-  { name: 'The Guardian Nigeria', url: process.env.EDITORIAL_GUARDIAN_FEED || 'https://guardian.ng/feed/', weight: 8 },
+  { name: 'PUNCH Special Features', url: 'https://rss.punchng.com/v1/category/special_feature', weight: 8 },
+  { name: 'The Guardian Nigeria', url: process.env.EDITORIAL_GUARDIAN_FEED || 'https://guardian.ng/feed/', weight: 10 },
+  { name: 'Nairametrics', url: process.env.EDITORIAL_NAIRAMETRICS_FEED || 'https://nairametrics.com/rss', weight: 8 },
+  { name: 'Premium Times', url: process.env.EDITORIAL_PREMIUM_TIMES_FEED || 'https://www.premiumtimesng.com/feed', weight: 9 },
+  { name: 'TheCable', url: process.env.EDITORIAL_THECABLE_FEED || 'https://www.thecable.ng/feed', weight: 8 },
+  // Africa / technology
+  { name: 'Africanews', url: process.env.EDITORIAL_AFRICANEWS_FEED || 'https://www.africanews.com/feed/', weight: 8 },
+  { name: 'TechCabal', url: process.env.EDITORIAL_TECHCABAL_FEED || 'https://techcabal.com/feed/', weight: 7 },
 ]
 
 const RELEVANCE_TERMS = [
-  'music','artist','singer','rapper','producer','dj','album','single','ep','mixtape','afrobeats','afrobeat','alte','hip-hop','hip hop','amapiano','fuji','highlife','nigeria','nigerian','africa','african','lagos','abuja','accra','ghana','culture','fashion','film','nollywood','photography','art','creative','creator','festival','concert','showcase','event','nightlife','radio','podcast','community','dance','entertainment','visual','design','media','label','recording','streaming','streetwear','gallery','documentary','fashion week','premiere','tour','release','record label','gaming','gaming industry','creative economy'
+  'music','artist','singer','rapper','producer','dj','album','single','ep','mixtape',
+  'afrobeats','afrobeat','alte','hip-hop','hip hop','amapiano','fuji','highlife',
+  'nigeria','nigerian','africa','african','lagos','abuja','accra','ghana','culture',
+  'fashion','film','nollywood','photography','art','creative','creator','festival',
+  'concert','showcase','event','nightlife','radio','podcast','community','dance',
+  'entertainment','visual','design','media','label','recording','streaming','streetwear',
+  'gallery','documentary','fashion week','premiere','tour','release','record label',
+  'politics','government','election','president','economy','business','finance','market',
+  'technology','tech','startup','fintech','innovation','internet','telecom','health',
+  'education','security','crime','justice','world','international','diplomacy','sports',
+  'football','super eagles','basketball','athletics','creative economy','lifestyle'
 ]
 
 const CATEGORY_RULES = [
   ['MUSIC', /(album|single|ep|singer|rapper|producer|dj|music|afrobeats|afrobeat|alte|amapiano|fuji|highlife|record label|release|tour)/i],
-  ['STYLE', /(fashion|style|streetwear|designer|design|fashion week)/i],
-  ['FILM', /(film|nollywood|cinema|movie|documentary|premiere|actor|actress)/i],
-  ['ART', /(art|photograph|visual|gallery|creative|creator|gaming)/i],
-  ['EVENTS', /(concert|festival|showcase|event|nightlife|tour)/i],
+  ['ENTERTAINMENT', /(entertainment|celebrity|bbnaija|big brother|nollywood|actor|actress|reality show|television|tv|showbiz)/i],
+  ['FILM', /(film|cinema|movie|documentary|premiere|box office)/i],
+  ['STYLE', /(fashion|style|streetwear|designer|fashion week|beauty)/i],
+  ['ART', /(art|photograph|visual|gallery|creative|creator|painting|design)/i],
+  ['EVENTS', /(concert|festival|showcase|event|nightlife|tour|party)/i],
+  ['SPORTS', /(sports|football|soccer|basketball|athletics|super eagles|npfl|fifa|caf|champions league)/i],
+  ['BUSINESS', /(business|finance|economy|market|bank|startup|fintech|investment|company|shares|stocks|revenue)/i],
+  ['TECHNOLOGY', /(technology|tech|startup|software|ai|artificial intelligence|internet|telecom|digital|cyber)/i],
+  ['NEWS', /(politics|government|election|president|minister|security|crime|court|justice|policy|diplomacy|world|international|education|health)/i],
 ]
 
 const MAX_SOURCE_ITEMS = Number(process.env.EDITORIAL_SOURCE_ITEMS || 18)
@@ -76,7 +102,7 @@ async function fetchArticleImage(pageUrl) {
   try {
     const response = await fetch(pageUrl, {
       headers: {
-        'User-Agent': 'FOR-THE-CULTURE-Editorial-Radar/5.0 (+https://galaxyfirestudios.com)',
+        'User-Agent': 'FOR-THE-CULTURE-Editorial-Radar/6.0',
         Accept: 'text/html,application/xhtml+xml'
       },
       signal: controller.signal,
@@ -117,7 +143,7 @@ function parseFeed(xml, sourceName, sourceWeight) {
 async function fetchFeed(source) {
   const controller = new AbortController(); const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS)
   try {
-    const response = await fetch(source.url, { headers: { 'User-Agent': 'FOR-THE-CULTURE-Editorial-Radar/4.0 (+https://galaxyfirestudios.com)', Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*' }, signal: controller.signal, redirect: 'follow' })
+    const response = await fetch(source.url, { headers: { 'User-Agent': 'FOR-THE-CULTURE-Editorial-Radar/6.0', Accept: 'application/rss+xml, application/atom+xml, application/xml, text/xml, */*' }, signal: controller.signal, redirect: 'follow' })
     if (!response.ok) throw new Error(`HTTP ${response.status}`)
     return { source, items: parseFeed(await response.text(), source.name, source.weight) }
   } finally { clearTimeout(timer) }
@@ -133,7 +159,7 @@ function relevance(item) {
 function category(item) {
   const text = `${item.title} ${item.excerpt}`
   for (const [name, rule] of CATEGORY_RULES) if (rule.test(text)) return name
-  return 'CULTURE'
+  return 'NEWS'
 }
 function normalizeTitle(title) { return title.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim() }
 function normalizeUrl(url) { try { const parsed = new URL(url); parsed.hash = ''; parsed.search = ''; return parsed.toString().replace(/\/$/, '') } catch { return String(url || '').trim() } }
@@ -164,7 +190,7 @@ Each published story should feel like a confident human FOR THE CULTURE newsroom
 - body: 4–6 mobile-friendly paragraphs, approximately 300–450 words.
 - Give the story enough context to feel substantial, but stay strictly within the supplied facts.
 - Attribute the source naturally where appropriate.
-- category: MUSIC, CULTURE, STYLE, FILM, ART or EVENTS.
+- category: NEWS, MUSIC, ENTERTAINMENT, CULTURE, STYLE, FILM, ART, EVENTS, SPORTS, BUSINESS or TECHNOLOGY.
 - Return a story for each candidate unless the supplied metadata is genuinely insufficient to write a factual story. Never invent missing information to fill a gap.
 
 SOURCE CANDIDATES:
@@ -206,7 +232,7 @@ function cleanDraft(draft, item, index) {
   const dek = String(draft.dek || '').trim()
   const body = String(draft.body || '').trim()
   const draftCategory = String(draft.category || '').toUpperCase().trim()
-  const allowedCategories = new Set(['MUSIC', 'CULTURE', 'STYLE', 'FILM', 'ART', 'EVENTS'])
+  const allowedCategories = new Set(['NEWS', 'MUSIC', 'ENTERTAINMENT', 'CULTURE', 'STYLE', 'FILM', 'ART', 'EVENTS', 'SPORTS', 'BUSINESS', 'TECHNOLOGY'])
   if (!headline || !dek || !body) throw new Error(`Gemini returned an incomplete draft for "${item.title}".`)
   return {
     headline,

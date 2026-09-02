@@ -17,7 +17,7 @@ module.exports = async (req, res) => {
 
   try {
     const supabase = createClient(url, key)
-    const limit = Math.min(Math.max(Number(req.query?.limit || 6), 1), 12)
+    const limit = Math.min(Math.max(Number(req.query?.limit || 12), 1), 24)
 
     const { data, error } = await supabase
       .from('editorial_stories')

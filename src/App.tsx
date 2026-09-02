@@ -1,15 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import cultureArt from "@/imports/for-the-culture.webp";
-import visual01 from "@/imports/visuals/visual_01.webp";
-import visual02 from "@/imports/visuals/visual_02.webp";
-import visual03 from "@/imports/visuals/visual_03.webp";
-import visual04 from "@/imports/visuals/visual_04.webp";
-import visual05 from "@/imports/visuals/visual_05.webp";
-import visual06 from "@/imports/visuals/visual_06.webp";
-import visual07 from "@/imports/visuals/visual_07.webp";
-import visual08 from "@/imports/visuals/visual_08.webp";
-
-const visualPool = [visual01, visual02, visual03, visual04, visual05, visual06, visual07, visual08];
 
 type Story = {
   id?: string;
@@ -66,11 +56,11 @@ export default function App() {
   const [feedStatus, setFeedStatus] = useState<"loading" | "ready" | "empty" | "error">("loading");
   const [readerStory, setReaderStory] = useState<Story | null>(null);
   const [radioPlaylist, setRadioPlaylist] = useState<Track[]>([]);
-  const [radioIndex, setRadioIndex] = useState(() => Number(storageGet("ftc-radio-track-index", storageGet("gfs-radio-track-index", "0"))) || 0);
+  const [radioIndex, setRadioIndex] = useState(-1);
   const [radioHistory, setRadioHistory] = useState<Track[]>([]);
   const [playedKeys, setPlayedKeys] = useState<string[]>(() => {
     try {
-      const raw = localStorage.getItem("ftc-radio-played-keys") || localStorage.getItem("gfs-radio-played-keys") || "[]";
+      const raw = localStorage.getItem("ftc-radio-played-keys") || "[]";
       const value = JSON.parse(raw);
       return Array.isArray(value) ? value : [];
     } catch {
@@ -101,7 +91,7 @@ export default function App() {
     }
 
     setRadioIndex(index);
-    try { localStorage.setItem("ftc-radio-track-index", String(index)); } catch {}
+
     if (userInitiated) setRadioPausedByUser(false);
 
     const base = import.meta.env.BASE_URL || "/";
@@ -125,7 +115,23 @@ export default function App() {
   };
 
   const startRadio = async (userInitiated = false) => {
-    if (radioPlaylist.length) return playTrack(radioIndex, userInitiated);
+    if (radioPlaylist.length) {
+      const validIndex = radioIndex >= 0 && radioIndex < radioPlaylist.length;
+      if (!validIndex) {
+        const played = new Set(playedKeys);
+        const recent = new Set(radioHistory.slice(0, 8).map((track) => track.src || `${track.artist}-${track.title}`));
+        const fresh = radioPlaylist
+          .map((track, index) => ({ track, index, key: track.src || `${track.artist}-${track.title}` }))
+          .filter(({ key }) => !played.has(key) && !recent.has(key));
+        const pool = fresh.length ? fresh : radioPlaylist.map((track, index) => ({ track, index, key: track.src || `${track.artist}-${track.title}` }));
+        const chosen = pool[Math.floor(Math.random() * pool.length)];
+        if (chosen) {
+          setPlayedKeys((current) => Array.from(new Set([...current, chosen.key])).slice(-200));
+          return playTrack(chosen.index, userInitiated);
+        }
+      }
+      return playTrack(validIndex ? radioIndex : 0, userInitiated);
+    }
     if (!radioStreamUrl || !audioRef.current) {
       setRadioOpen(true);
       return false;
@@ -201,11 +207,18 @@ export default function App() {
         const tracks = data.tracks.filter((track: Track) => typeof track?.src === "string" && track.src);
         if (!tracks.length) return;
         setRadioPlaylist(tracks);
-        setRadioIndex((current) => Math.min(Math.max(current, 0), tracks.length - 1));
+        setRadioIndex(() => {
+          const played = new Set(playedKeys);
+          const recent = new Set(radioHistory.slice(0, 8).map((track) => track.src || `${track.artist}-${track.title}`));
+          const fresh = tracks.map((track, index) => ({ track, index, key: track.src || `${track.artist}-${track.title}` }))
+            .filter(({ key }) => !played.has(key) && !recent.has(key));
+          const pool = fresh.length ? fresh : tracks.map((track, index) => ({ track, index, key: track.src || `${track.artist}-${track.title}` }));
+          return pool[Math.floor(Math.random() * pool.length)]?.index ?? 0;
+        });
       })
       .catch(() => {});
     try {
-      const raw = localStorage.getItem("ftc-radio-history") || localStorage.getItem("gfs-radio-history") || "[]";
+      const raw = localStorage.getItem("ftc-radio-history") || "[]";
       const value = JSON.parse(raw);
       if (Array.isArray(value)) setRadioHistory(value.slice(0, 8));
     } catch {}
@@ -252,10 +265,10 @@ export default function App() {
           return Array.isArray(data?.stories) ? data : null;
         } catch { return null; }
       };
-      const [staticData, apiData] = await Promise.all([fetchJson(staticUrl, "default"), fetchJson("/api/editorial-feed?limit=12", "no-store")]);
+      const [staticData, apiData] = await Promise.all([fetchJson(staticUrl, "default"), fetchJson("/api/editorial-feed?limit=24", "no-store")]);
       const merged = Array.from(new Map([...(staticData?.stories || []), ...(apiData?.stories || [])].map((story: Story, index) => [storyKey(story) || `story-${index}`, story])).values())
         .sort((a, b) => (Date.parse(b.published_at || "") || 0) - (Date.parse(a.published_at || "") || 0))
-        .slice(0, 12);
+        .slice(0, 24);
       if (cancelled) return;
       if (merged.length) {
         setStories(merged);
@@ -281,8 +294,24 @@ export default function App() {
 
   const hero = stories[0];
   const latest = stories.slice(1, 4);
-  const musicStories = useMemo(() => stories.filter((story) => /music|artist|album|single|afrobeats|hip-hop|song|release/i.test(`${story.category || ""} ${storyTitle(story)} ${story.dek || ""}`)).slice(0, 3), [stories]);
-  const cultureStories = useMemo(() => stories.filter((story) => /culture|fashion|art|style|creative|entertainment|film|media/i.test(`${story.category || ""} ${storyTitle(story)} ${story.dek || ""}`)).slice(0, 3), [stories]);
+  const musicStories = useMemo(() => {
+    const matching = stories.filter((story) => /music|artist|album|single|afrobeats|hip-hop|song|release/i.test(`${story.category || ""} ${storyTitle(story)} ${story.dek || ""}`));
+    return [...matching, ...stories.filter((story) => !matching.includes(story))].slice(0, 3);
+  }, [stories]);
+  const cultureStories = useMemo(() => {
+    const matching = stories.filter((story) => /culture|fashion|art|style|creative|entertainment|film|media/i.test(`${story.category || ""} ${storyTitle(story)} ${story.dek || ""}`));
+    return [...matching, ...stories.filter((story) => !matching.includes(story))].slice(0, 3);
+  }, [stories]);
+  const upNextTracks = useMemo(() => {
+    if (!radioPlaylist.length) return [];
+    const currentKey = radioTrack.src || `${radioTrack.artist}-${radioTrack.title}`;
+    const recentKeys = new Set([currentKey, ...radioHistory.slice(0, 5).map((track) => track.src || `${track.artist}-${track.title}`), ...playedKeys.slice(-10)]);
+    const preferred = radioPlaylist.map((track, index) => ({ track, index, key: track.src || `${track.artist}-${track.title}` }))
+      .filter(({ key }) => !recentKeys.has(key));
+    const fallback = radioPlaylist.map((track, index) => ({ track, index, key: track.src || `${track.artist}-${track.title}` }))
+      .filter(({ key }) => key !== currentKey);
+    return (preferred.length ? preferred : fallback).slice(0, 4);
+  }, [radioPlaylist, radioTrack, radioHistory, playedKeys]);
   const searchResults = useMemo(() => {
     if (!searchTerm.trim()) return stories.slice(0, 6);
     const term = searchTerm.toLowerCase();
@@ -313,7 +342,7 @@ export default function App() {
           <span className="brand-tagline">THE SOUND. THE CULTURE. THE MOVEMENT.</span>
         </a>
         <nav className={`main-nav ${menuOpen ? "is-open" : ""}`} aria-label="Primary navigation">
-          {[["HOME", "#top"], ["RADIO", "#radio"], ["NEWS", "#news"], ["MUSIC", "#music"], ["VIDEOS", "#videos"], ["CULTURE", "#culture"], ["EVENTS", "#events"]].map(([label, href], index) => (
+          {[["HOME", "#top"], ["NEWS", "#news"], ["MUSIC", "#music"], ["ENTERTAINMENT", "#entertainment"], ["CULTURE", "#culture"], ["VIDEOS", "#videos"], ["RADIO", "#radio"], ["EVENTS", "#events"]].map(([label, href], index) => (
             <a key={label} className={index === 0 ? "active" : ""} href={href} onClick={() => setMenuOpen(false)}>{label}</a>
           ))}
         </nav>
@@ -339,7 +368,7 @@ export default function App() {
           <div className="hero-copy">
             <div className="live-kicker">● LIVE NOW</div>
             <h1>THE SOUND.<br /><em>THE CULTURE.</em><br />THE MOVEMENT.</h1>
-            <p>24/7 streaming the best in Afrobeats, Hip-Hop, and global culture.</p>
+            <p>News, music, culture, entertainment and live radio from Nigeria, Africa and the world.</p>
             <div className="hero-actions">
               <button type="button" className="primary-button" onClick={() => { setRadioOpen(true); startRadio(true); }}>▶ LISTEN LIVE</button>
               <a className="secondary-button" href="#radio">▣ VIEW SCHEDULE</a>
@@ -376,7 +405,10 @@ export default function App() {
         </section>
 
         <section className="content-section" id="news">
-          <div className="section-head"><div><span className="eyebrow">01 / EDITORIAL</span><h2>FEATURED STORIES</h2></div><a href="#news-grid">VIEW ALL →</a></div>
+          <div className="section-head"><div><span className="eyebrow">01 / NEWSROOM</span><h2>NEWS</h2></div><a href="#news-grid">VIEW ALL →</a></div>
+          <div className="category-strip" aria-label="News categories">
+            {["LATEST", "NIGERIA", "AFRICA", "WORLD", "ENTERTAINMENT", "MUSIC", "CULTURE", "BUSINESS", "TECHNOLOGY", "SPORTS"].map((label) => <span key={label}>{label}</span>)}
+          </div>
           <div className="featured-grid">
             {(latest.length ? latest : [{ headline: "The culture is always moving.", dek: "Your latest stories will appear here.", category: "CULTURE" }, { headline: "Music. Culture. Entertainment.", dek: "Discover the voices shaping the moment.", category: "MUSIC" }, { headline: "FOR THE CULTURE ORIGINALS", dek: "Original conversations, sessions and stories are coming into focus.", category: "ORIGINALS" }]).map((story, index) => (
               <article className={`feature-card ${index === 0 ? "feature-card-large" : ""}`} key={storyKey(story as Story)}>
@@ -391,7 +423,7 @@ export default function App() {
         </section>
 
         <section className="content-section split-section" id="news-grid">
-          <div className="section-head"><div><span className="eyebrow">02 / LATEST</span><h2>LATEST FROM THE CULTURE</h2></div><span className="muted">{feedStatus === "ready" ? "LIVE EDITORIAL FEED" : feedStatus === "loading" ? "LOADING EDITORIAL FEED" : "EDITORIAL RADAR"}</span></div>
+          <div className="section-head"><div><span className="eyebrow">02 / LATEST</span><h2>LATEST FROM THE CULTURE</h2></div><span className="muted">{feedStatus === "ready" ? "LIVE EDITORIAL RADAR · NIGERIA · AFRICA · WORLD" : feedStatus === "loading" ? "LOADING EDITORIAL RADAR" : "EDITORIAL RADAR"}</span></div>
           <div className="latest-layout">
             <div className="latest-list">
               {(stories.length ? stories.slice(0, 6) : []).map((story, index) => (
@@ -407,42 +439,48 @@ export default function App() {
 
         <section className="content-section" id="music">
           <div className="section-head"><div><span className="eyebrow">03 / SOUND</span><h2>MUSIC DISCOVERY</h2></div><span className="muted">NEW MUSIC · TRENDING · AFRICAN SOUND</span></div>
-          <div className="music-grid">{(musicStories.length ? musicStories : visualPool.slice(0, 3).map((image, index) => ({ headline: ["NEW MUSIC IS MOVING", "THE SOUND OF THE MOMENT", "EMERGING VOICES"][index], image_url: image } as Story))).map((story, index) => <article className="music-card" key={storyKey(story)}><img src={safeImage(story)} alt="" loading="lazy" /><div><span>0{index + 1} / MUSIC</span><h3>{storyTitle(story)}</h3>{story.dek && <p>{story.dek}</p>}{story.id && <button type="button" onClick={() => openStory(story)}>EXPLORE →</button>}</div></article>)}</div>
+          <div className="music-grid">{musicStories.map((story, index) => <article className="music-card" key={storyKey(story)}><img src={safeImage(story)} alt={storyTitle(story)} loading="lazy" /><div><span>0{index + 1} / {(story.category || "MUSIC").toUpperCase()}</span><h3>{storyTitle(story)}</h3>{story.dek && <p>{story.dek}</p>}<button type="button" onClick={() => openStory(story)}>EXPLORE →</button></div></article>)}{!stories.length && <div className="empty-feed"><strong>THE MUSIC DESK IS BETWEEN STORIES.</strong><p>Music stories will appear automatically as the editorial feed fills.</p></div>}</div>
+        </section>
+
+        <section className="content-section" id="entertainment">
+          <div className="section-head"><div><span className="eyebrow">04 / ENTERTAINMENT</span><h2>ENTERTAINMENT</h2></div><span className="muted">CELEBRITY · FILM · TV · EVENTS · TRENDS</span></div>
+          <div className="culture-grid">{stories.filter((story) => /ENTERTAINMENT|FILM|EVENTS|STYLE/i.test(`${story.category || ""} ${storyTitle(story)}`)).slice(0, 4).map((story) => <article key={storyKey(story)}><img src={safeImage(story)} alt={storyTitle(story)} loading="lazy" /><div><span>{(story.category || "ENTERTAINMENT").toUpperCase()}</span><h3>{storyTitle(story)}</h3><button type="button" onClick={() => openStory(story)}>READ →</button></div></article>)}</div>
         </section>
 
         <section className="radio-feature" aria-label="For the Culture live radio">
           <div className="radio-feature-art"><img src={cultureArt} alt="For the Culture Radio" /><div className="live-badge">● ON AIR</div></div>
-          <div className="radio-feature-copy"><span className="eyebrow">04 / LIVE RADIO</span><h2>THE SOUND<br /><em>NEVER STOPS.</em></h2><p>Tap in to the FTC station. Keep the culture playing while you move through the platform.</p><div className="radio-actions"><button type="button" className="primary-button" onClick={() => { setRadioOpen(true); startRadio(true); }}>▶ {radioPlaying ? "PLAYING LIVE" : "LISTEN LIVE"}</button><a className="secondary-button" href="#radio">VIEW SCHEDULE</a></div></div>
-          <div className="radio-side"><span>UP NEXT</span>{radioPlaylist.slice(0, 4).map((track, index) => <button type="button" key={`${track.src}-${index}`} onClick={() => playTrack(radioPlaylist.indexOf(track), true)}><img src={track.poster ? `${import.meta.env.BASE_URL || "/"}${track.poster}` : cultureArt} alt="" /><div><strong>{track.artist}</strong><small>{track.title}</small></div><b>⋮</b></button>)}</div>
+          <div className="radio-feature-copy"><span className="eyebrow">05 / LIVE RADIO</span><h2>THE SOUND<br /><em>NEVER STOPS.</em></h2><p>Tap in to the FTC station. Keep the culture playing while you move through the platform.</p><div className="radio-actions"><button type="button" className="primary-button" onClick={() => { setRadioOpen(true); startRadio(true); }}>▶ {radioPlaying ? "PLAYING LIVE" : "LISTEN LIVE"}</button><a className="secondary-button" href="#radio">VIEW SCHEDULE</a></div></div>
+          <div className="radio-side"><span>UP NEXT</span>{upNextTracks.map(({ track, index }) => <button type="button" key={`${track.src}-${index}`} onClick={() => playTrack(index, true)}><img src={track.poster ? `${import.meta.env.BASE_URL || "/"}${track.poster}` : cultureArt} alt="" /><div><strong>{track.artist}</strong><small>{track.title}</small></div><b>▶</b></button>)}</div>
         </section>
 
         <section className="content-section" id="culture">
-          <div className="section-head"><div><span className="eyebrow">05 / CULTURE</span><h2>MORE THAN MUSIC.</h2></div><span className="muted">FASHION · ART · LIFESTYLE · AFRICA</span></div>
-          <div className="culture-grid">{(cultureStories.length ? cultureStories : visualPool.slice(3, 6).map((image, index) => ({ headline: ["AFRICAN CREATIVITY, IN MOTION", "STYLE IS A LANGUAGE", "THE CULTURE EDIT"][index], image_url: image } as Story))).map((story) => <article key={storyKey(story)}><img src={safeImage(story)} alt="" loading="lazy" /><div><span>{(story.category || "CULTURE").toUpperCase()}</span><h3>{storyTitle(story)}</h3>{story.id && <button type="button" onClick={() => openStory(story)}>READ →</button>}</div></article>)}</div>
+          <div className="section-head"><div><span className="eyebrow">06 / CULTURE</span><h2>MORE THAN MUSIC.</h2></div><span className="muted">FASHION · ART · LIFESTYLE · AFRICA</span></div>
+          <div className="culture-grid">{cultureStories.map((story) => <article key={storyKey(story)}><img src={safeImage(story)} alt={storyTitle(story)} loading="lazy" /><div><span>{(story.category || "CULTURE").toUpperCase()}</span><h3>{storyTitle(story)}</h3><button type="button" onClick={() => openStory(story)}>READ →</button></div></article>)}{!stories.length && <div className="empty-feed"><strong>THE CULTURE DESK IS BETWEEN STORIES.</strong><p>Culture stories will appear automatically as the editorial feed fills.</p></div>}</div>
         </section>
 
         <section className="originals-section" id="videos">
-          <div className="originals-copy"><span className="eyebrow">06 / FTC ORIGINALS</span><h2>WATCH.<br /><em>LISTEN.</em><br />DISCOVER.</h2><p>Interviews, studio sessions, documentaries, culture conversations and original video — built to give FTC a voice beyond the feed.</p><a className="secondary-button" href="#events">EXPLORE ORIGINALS →</a></div>
-          <div className="video-grid">{visualPool.slice(0, 4).map((image, index) => <article key={image}><img src={image} alt="FTC Originals visual" loading="lazy" /><button type="button"><span>▶</span><div><small>FTC ORIGINALS · 0{index + 1}</small><strong>{["STUDIO SESSIONS", "THE CULTURE CONVERSATION", "ARTISTS IN MOTION", "BEHIND THE SOUND"][index]}</strong></div></button></article>)}</div>
+          <div className="originals-copy"><span className="eyebrow">07 / FTC ORIGINALS</span><h2>WATCH.<br /><em>LISTEN.</em><br />DISCOVER.</h2><p>Interviews, studio sessions, documentaries, culture conversations and original video — built to give FTC a voice beyond the feed.</p><a className="secondary-button" href="#events">EXPLORE ORIGINALS →</a></div>
+          <div className="video-grid">{stories.slice(0, 4).map((story, index) => <article key={storyKey(story)}><img src={safeImage(story)} alt={storyTitle(story)} loading="lazy" /><button type="button" onClick={() => openStory(story)}><span>▶</span><div><small>FTC ORIGINALS · 0{index + 1}</small><strong>{storyTitle(story)}</strong></div></button></article>)}{!stories.length && <div className="empty-feed"><strong>FTC ORIGINALS ARE COMING INTO FOCUS.</strong><p>New stories and original media will appear here as they are published.</p></div>}</div>
         </section>
 
         <section className="events-section" id="events">
-          <div className="section-head"><div><span className="eyebrow">07 / EVENTS</span><h2>THE CULTURE, IRL.</h2></div><span className="muted">LIVE · COMMUNITY · EXPERIENCES</span></div>
-          <div className="events-card"><div className="event-date"><strong>FTC</strong><span>LIVE</span></div><div><span className="story-label">COMING SOON</span><h3>LISTENING PARTIES, CULTURE NIGHTS & LIVE EXPERIENCES</h3><p>Event listings can plug into the platform without changing the core experience. New dates and locations will appear here as they are published.</p></div><a href="mailto:hello@fortheculture.ng" className="text-link">GET EVENT UPDATES →</a></div>
+          <div className="section-head"><div><span className="eyebrow">08 / EVENTS</span><h2>THE CULTURE, IRL.</h2></div><span className="muted">LIVE · COMMUNITY · EXPERIENCES</span></div>
+          <div className="events-card"><div className="event-date"><strong>FTC</strong><span>LIVE</span></div><div><span className="story-label">COMING SOON</span><h3>LISTENING PARTIES, CULTURE NIGHTS & LIVE EXPERIENCES</h3><p>Event listings can plug into the platform without changing the core experience. New dates and locations will appear here as they are published.</p></div><a href="mailto:fortheculture184@gmail.com" className="text-link">GET EVENT UPDATES →</a></div>
         </section>
 
         <section className="newsletter-section">
-          <div><span className="eyebrow">08 / JOIN THE MOVEMENT</span><h2>STAY CONNECTED.</h2><p>Get the latest news, updates and exclusive stories delivered to you.</p></div>
+          <div><span className="eyebrow">09 / JOIN THE MOVEMENT</span><h2>STAY CONNECTED.</h2><p>Get the latest news, updates and exclusive stories delivered to you.</p></div>
           <form onSubmit={submitNewsletter}><input type="email" value={newsletterEmail} onChange={(event) => setNewsletterEmail(event.target.value)} placeholder="Enter your email" aria-label="Email address" /><button type="submit">SUBSCRIBE</button>{newsletterMessage && <small>{newsletterMessage}</small>}</form>
-          <div className="socials"><span>FOLLOW US</span><a href="#top" aria-label="Instagram">◎</a><a href="#top" aria-label="X">𝕏</a><a href="#top" aria-label="TikTok">♪</a><a href="#top" aria-label="YouTube">▶</a></div>
+          <div className="socials"><span>FOLLOW US</span><a href="https://www.instagram.com/forthecultureondy/?hl=en" target="_blank" rel="noreferrer" aria-label="Instagram">◎</a><a href="https://x.com/forthecult90010?s=11" target="_blank" rel="noreferrer" aria-label="X">𝕏</a></div>
+          <div className="contact-strip"><a href="mailto:fortheculture184@gmail.com">fortheculture184@gmail.com</a><a href="tel:+2348145939698">+234 814 593 9698</a></div>
         </section>
       </main>
 
       <footer className="site-footer">
-        <div className="footer-brand"><span className="brand-main">FOR THE</span><span className="brand-accent">CULTURE</span><span className="brand-tagline">THE MOVEMENT.</span></div>
-        <div className="footer-links"><div><span>EXPLORE</span><a href="#radio">Radio</a><a href="#news">News</a><a href="#music">Music</a><a href="#videos">Videos</a></div><div><span>DISCOVER</span><a href="#culture">Culture</a><a href="#events">Events</a><a href="#top">About</a><a href="mailto:hello@fortheculture.ng">Contact</a></div><div><span>SUPPORT</span><a href="#top">Community</a><a href="#top">Partnerships</a><a href="#top">Privacy</a><a href="#top">Terms</a></div></div>
+        <div className="footer-brand"><span className="brand-main">FOR THE</span><span className="brand-accent">CULTURE</span><span className="brand-tagline">THE MOVEMENT.</span><p className="footer-contact"><a href="mailto:fortheculture184@gmail.com">fortheculture184@gmail.com</a><a href="tel:+2348145939698">+234 814 593 9698</a></p></div>
+        <div className="footer-links"><div><span>EXPLORE</span><a href="#radio">Radio</a><a href="#news">News</a><a href="#music">Music</a><a href="#videos">Videos</a></div><div><span>DISCOVER</span><a href="#culture">Culture</a><a href="#events">Events</a><a href="#top">About</a><a href="mailto:fortheculture184@gmail.com">Contact</a></div><div><span>SUPPORT</span><a href="https://www.instagram.com/forthecultureondy/?hl=en" target="_blank" rel="noreferrer">Instagram</a><a href="https://x.com/forthecult90010?s=11" target="_blank" rel="noreferrer">X</a><a href="mailto:fortheculture184@gmail.com">Email FTC</a><a href="tel:+2348145939698">Call FTC</a></div></div>
         <blockquote>“The culture isn’t just what we consume.<br />It’s what we create.”<cite>— FOR THE CULTURE</cite></blockquote>
-        <div className="footer-bottom"><span>© 2026 FOR THE CULTURE. ALL RIGHTS RESERVED.</span><span>MUSIC · CULTURE · ENTERTAINMENT · STORIES · RADIO</span></div>
+        <div className="footer-bottom"><span>© 2026 FOR THE CULTURE. ALL RIGHTS RESERVED.</span><span>NEWS · MUSIC · CULTURE · ENTERTAINMENT · VIDEO · RADIO</span></div>
       </footer>
 
       <div className={`radio-drawer ${radioOpen ? "is-open" : ""}`} role="dialog" aria-label="For the Culture radio player" aria-modal="false">

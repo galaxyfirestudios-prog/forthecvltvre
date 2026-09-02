@@ -98,3 +98,46 @@ button { border:0; cursor:pointer; color:inherit; }
 @media (max-width:1100px) { .site-header { grid-template-columns:210px 1fr auto; }.main-nav { gap:18px; }.hero-grid { grid-template-columns:1.2fr .9fr; }.hero-story { grid-column:1/-1;min-height:270px; }.radio-feature { grid-template-columns:.7fr 1.1fr; }.radio-side { grid-column:1/-1;border-left:0;border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(2,1fr);gap:0 20px; }.newsletter-section { grid-template-columns:1fr 1.2fr; }.socials { justify-content:flex-start; } .site-footer { grid-template-columns:1fr 1.5fr; }.site-footer blockquote { grid-column:1/-1; } }
 @media (max-width:760px) { .site-header { grid-template-columns:1fr auto; padding:13px 16px; }.brand-main,.brand-accent { font-size:23px; }.brand-tagline { font-size:7px; }.main-nav { position:absolute;left:0;right:0;top:100%;display:none;flex-direction:column;gap:0;padding:8px 16px;background:rgba(8,5,12,.98);border-bottom:1px solid var(--line); }.main-nav.is-open { display:flex; }.main-nav a { padding:13px 0; }.menu-button { display:block; }.icon-button { display:none; }.live-pill { padding:9px 10px;font-size:9px; }.hero-grid { grid-template-columns:1fr; }.hero-copy { padding:55px 20px 28px;min-height:500px; }.hero-visual { min-height:390px;border-left:0;border-right:0; }.hero-story { min-height:300px;padding:35px 20px; }.hero-copy h1 { font-size:53px; }.now-playing-bar { grid-template-columns:45px 1fr 42px; padding:9px 15px; }.now-art { width:45px;height:45px; }.skip-control,.bar-wave,.quality,.expand-radio { display:none; }.content-section,.events-section { padding:42px 16px; }.section-head { align-items:start; }.section-head > a,.section-head > span { font-size:8px; }.featured-grid,.music-grid,.culture-grid { grid-template-columns:1fr; }.feature-card,.feature-card-large { min-height:280px; }.latest-layout { grid-template-columns:1fr; }.latest-row { grid-template-columns:25px 74px minmax(0,1fr); }.latest-row > b { display:none; }.latest-row img { width:74px;height:60px; }.latest-text strong { font-size:18px; }.latest-text span { display:none; }.radio-feature { grid-template-columns:1fr; }.radio-feature-art { min-height:310px; }.radio-feature-copy { padding:45px 20px; }.radio-side { grid-template-columns:1fr; }.originals-section { grid-template-columns:1fr; padding:55px 16px; }.video-grid { grid-template-columns:1fr 1fr; }.video-grid article { min-height:170px; }.events-card { grid-template-columns:70px 1fr;gap:16px; }.event-date { width:65px;height:65px; }.events-card h3 { font-size:22px; }.events-card .text-link { grid-column:2; }.newsletter-section { grid-template-columns:1fr;padding:32px 16px; }.newsletter-section form { grid-template-columns:1fr 100px; }.socials { justify-content:flex-start; }.site-footer { grid-template-columns:1fr;padding:38px 16px 18px;gap:30px; }.footer-links { grid-template-columns:repeat(3,1fr); }.site-footer blockquote { font-size:20px; }.footer-bottom { flex-direction:column;gap:7px; }.radio-drawer { right:10px;bottom:10px; }.reader-overlay { padding:0; }.reader-card { max-height:100vh;border-left:0;border-right:0; }.reader-card > img { height:260px; }.reader-content h2 { font-size:46px; }.search-panel { top:65px;padding:12px 15px; } }
 @media (prefers-reduced-motion:reduce) { html { scroll-behavior:auto; } *,*::before,*::after { animation:none !important;transition:none !important; } }
+
+
+/* FTC identity/contact and editorial taxonomy */
+.category-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0 0 1.25rem;
+}
+.category-strip span {
+  border: 1px solid rgba(255,255,255,.14);
+  border-radius: 999px;
+  padding: .42rem .72rem;
+  font-size: .62rem;
+  letter-spacing: .08em;
+  color: rgba(255,255,255,.72);
+  background: rgba(255,255,255,.025);
+}
+.contact-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .7rem 1.25rem;
+  margin-top: 1rem;
+}
+.contact-strip a,
+.footer-contact a {
+  color: inherit;
+  text-decoration: none;
+}
+.contact-strip a:hover,
+.footer-contact a:hover {
+  text-decoration: underline;
+}
+.footer-contact {
+  display: grid;
+  gap: .35rem;
+  margin: 1rem 0 0;
+  font-size: .82rem;
+  line-height: 1.4;
+}
+.socials a[href^="https://"] {
+  text-decoration: none;
+}
