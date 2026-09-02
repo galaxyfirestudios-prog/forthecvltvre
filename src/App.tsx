@@ -1494,7 +1494,13 @@ export default function App() {
             ],
             ["CULTURE", "#culture"],
             ["VIDEOS", "#videos"],
-            ["RADIO", "#radio"],
+
+            /*
+             * RADIO NOW CONNECTS DIRECTLY TO
+             * SECTION 05 / LIVE RADIO.
+             */
+            ["RADIO", "#radio-section"],
+
             ["EVENTS", "#events"],
           ].map(
             (
@@ -2463,10 +2469,11 @@ export default function App() {
         </section>
 
         {/* ----------------------------------------------------
-            RADIO FEATURE
+            RADIO FEATURE — SECTION 05
         ----------------------------------------------------- */}
 
         <section
+          id="radio-section"
           className="radio-feature"
           aria-label="For the Culture live radio"
         >
