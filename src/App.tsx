@@ -75,6 +75,7 @@ export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const [stories, setStories] = useState<Story[]>([]);
+  const [videoStories, setVideoStories] = useState<Story[]>([]);
   const [feedStatus, setFeedStatus] = useState<
     "loading" | "ready" | "empty" | "error"
   >("loading");
@@ -1252,6 +1253,59 @@ export default function App() {
 
   /*
    * ------------------------------------------------------------
+   * DEDICATED VIDEO FEED
+   * ------------------------------------------------------------
+   * Videos are intentionally loaded from the dedicated YouTube
+   * Video Engine rather than the editorial/news feed.
+   */
+
+  useEffect(() => {
+    let cancelled = false;
+    let timer: ReturnType<typeof setInterval> | undefined;
+
+    const loadVideos = async () => {
+      try {
+        const response = await fetch('/api/video-feed?limit=12', {
+          headers: { Accept: 'application/json' },
+          cache: 'no-store',
+        });
+
+        if (!response.ok) return;
+
+        const data = await response.json();
+        const videos = Array.isArray(data?.videos) ? data.videos : [];
+
+        if (!cancelled) {
+          setVideoStories(videos);
+        }
+      } catch {
+        // Keep the existing video list during temporary API failures.
+      }
+    };
+
+    loadVideos();
+
+    timer = setInterval(() => {
+      if (document.visibilityState === 'visible') {
+        loadVideos();
+      }
+    }, 10 * 60 * 1000);
+
+    const refresh = () => {
+      if (document.visibilityState === 'visible') loadVideos();
+    };
+
+    document.addEventListener('visibilitychange', refresh);
+
+    return () => {
+      cancelled = true;
+      if (timer) clearInterval(timer);
+      document.removeEventListener('visibilitychange', refresh);
+    };
+  }, []);
+
+  /*
+   * ------------------------------------------------------------
    * STORY READER
    * ------------------------------------------------------------
    */
@@ -1350,25 +1404,6 @@ export default function App() {
       ].slice(0, 3);
     }, [stories]);
 
-  const videoStories =
-    useMemo(() => {
-      const isVideo = (story: Story) => {
-        const mediaType =
-          String(story.media_type || "").toLowerCase();
-
-        const url =
-          String(story.video_url || story.source_url || "").toLowerCase();
-
-        return (
-          mediaType.includes("video") ||
-          Boolean(story.video_url) ||
-          Boolean(story.video_id) ||
-          /youtube\.com|youtu\.be|vimeo\.com/.test(url)
-        );
-      };
-
-      return stories.filter(isVideo).slice(0, 4);
-    }, [stories]);
 
   const getVideoEmbedUrl = (story: Story) => {
     if (story.video_id) {
@@ -3001,36 +3036,20 @@ export default function App() {
                           overflow: "hidden",
                         }}
                       >
-                        {/\.(mp4|webm|ogg)(?:$|[?#])/i.test(
-                          story.video_url || ""
-                        ) ? (
-                          <video
-                            src={story.video_url}
-                            controls
-                            playsInline
-                            preload="metadata"
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              objectFit: "cover",
-                            }}
-                          />
-                        ) : (
-                          <iframe
-                            src={embedUrl}
-                            title={storyTitle(
-                              story
-                            )}
-                            loading="lazy"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowFullScreen
-                            style={{
-                              width: "100%",
-                              height: "100%",
-                              border: 0,
-                            }}
-                          />
-                        )}
+                        <iframe
+                          src={embedUrl}
+                          title={storyTitle(
+                            story
+                          )}
+                          loading="lazy"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          allowFullScreen
+                          style={{
+                            width: "100%",
+                            height: "100%",
+                            border: 0,
+                          }}
+                        />
                       </div>
                     ) : (
                       <img

@@ -1,0 +1,48 @@
+name: Update FTC YouTube Video Feed
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '*/15 * * * *'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: ftc-youtube-video-feed
+  cancel-in-progress: false
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Scan approved YouTube channels via public feeds
+        env:
+          VIDEO_SCAN_PER_CHANNEL: 15
+          VIDEO_MAX_SAVED: 60
+          VIDEO_MAX_AGE_DAYS: 45
+          VIDEO_INCLUDE_SHORTS: 'false'
+        run: node scripts/video-scan.mjs
+
+      - name: Commit updated feed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add public/video-feed.json
+          if git diff --cached --quiet; then
+            echo "No video feed changes."
+            exit 0
+          fi
+          git commit -m "chore: update FTC video feed"
+          git push

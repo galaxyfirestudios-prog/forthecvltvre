@@ -1,0 +1,15 @@
+export const VIDEO_SOURCES = [
+  { name: 'HIPTV', handle: '@official_hiptv', channel_id: 'UC_FJtrv0AfN7GQV-sZrlX9g', region: 'Nigeria', weight: 16, categories: ['MUSIC','ENTERTAINMENT','EVENTS','CULTURE'] },
+  { name: 'NdaniTV', handle: '@ndanitv', channel_id: 'UCx2qMIoQIchX9o5x38hf1Bw', region: 'Nigeria', weight: 15, categories: ['CULTURE','FILM','ENTERTAINMENT','STYLE'] },
+  { name: 'The Beat 99.9 FM', handle: '@thebeat999fm', channel_id: 'UCyHep9AqfVuNYd0ig8u0Odw', region: 'Nigeria', weight: 15, categories: ['MUSIC','INTERVIEWS','CULTURE'] },
+  { name: 'Cool FM Nigeria', handle: '@CoolFMNigeria', region: 'Nigeria', weight: 15, categories: ['MUSIC','ENTERTAINMENT','CULTURE','EVENTS'] },
+  { name: 'TRACE Naija', handle: '@TRACENAIJA', region: 'Nigeria', weight: 16, categories: ['MUSIC','EVENTS','CULTURE'] },
+  { name: 'Zikoko', handle: '@Zikoko', channel_id: 'UCEGExbcLY24dsF-gzaAGPbw', region: 'Nigeria', weight: 15, categories: ['CULTURE','ENTERTAINMENT','STYLE'] },
+  { name: 'The Culture Custodian', handle: '@culturecustodian', region: 'Nigeria', weight: 16, categories: ['CULTURE','MUSIC','FILM','STYLE','ART'] },
+  { name: 'Pulse Nigeria', handle: '@PulseNigeria247', channel_id: 'UCeMoPD4wqlfUQVZ7kiaAf9w', region: 'Nigeria', weight: 11, categories: ['ENTERTAINMENT','MUSIC','CULTURE','STYLE','FILM'] },
+  { name: 'Soundcity Africa', handle: '@SoundcityTVAfrica', region: 'Africa', weight: 14, categories: ['MUSIC','EVENTS','CULTURE'] },
+  { name: 'OkayAfrica', handle: '@OkayAfrica', region: 'Africa', weight: 13, categories: ['MUSIC','CULTURE','STYLE','FILM','ART'] },
+  { name: 'YFM South Africa', handle: '@YFM', region: 'South Africa', weight: 12, categories: ['MUSIC','CULTURE','ENTERTAINMENT'] },
+  { name: 'SABC 1', handle: '@SABC1', channel_id: 'UCVCwhCXyuzooCY-H2XLyinw', region: 'South Africa', weight: 10, categories: ['CULTURE','ENTERTAINMENT','MUSIC','FILM'] },
+  { name: 'Audiomack Africa', handle: '@audiomack', region: 'Africa', weight: 11, categories: ['MUSIC','CULTURE','ARTISTS'] },
+];
