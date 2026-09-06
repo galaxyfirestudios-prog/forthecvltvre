@@ -90,6 +90,30 @@ function imageFrom(block) {
   return media?.[1] || ''
 }
 
+function videoFrom(block, baseUrl) {
+  const candidates = [
+    block.match(/<media:content[^>]+type=["']video\/[^"']+["'][^>]+url=["']([^"']+)["']/i)?.[1],
+    block.match(/<media:content[^>]+url=["']([^"']+)["'][^>]+type=["']video\/[^"']+["']/i)?.[1],
+    block.match(/<enclosure[^>]+type=["']video\/[^"']+["'][^>]+url=["']([^"']+)["']/i)?.[1],
+    block.match(/<enclosure[^>]+url=["']([^"']+)["'][^>]+type=["']video\/[^"']+["']/i)?.[1],
+    block.match(/<iframe[^>]+src=["']([^"']+)["']/i)?.[1],
+    block.match(/<video[^>]+src=["']([^"']+)["']/i)?.[1],
+  ]
+
+  for (const value of candidates) {
+    if (!value) continue
+    try {
+      const url = new URL(value, baseUrl).toString()
+      const host = new URL(url).hostname.toLowerCase()
+      if (host.includes('youtube.com') || host.includes('youtu.be') || host.includes('vimeo.com') || /\.(mp4|webm|ogg)(?:$|[?#])/i.test(url)) {
+        return url
+      }
+    } catch {}
+  }
+
+  return ''
+}
+
 function parseDate(value) {
   if (!value) return null
   const date = new Date(value)
@@ -112,6 +136,7 @@ function parseFeed(xml, sourceName, sourceWeight) {
       excerpt: decode(description).slice(0, 1400),
       published_at: parseDate(rawDate),
       image_url: imageFrom(block),
+      video_url: videoFrom(block, decode(rawLink)),
     }
   }).filter(item => item.title && item.source_url)
 }
@@ -294,13 +319,27 @@ async function publishBatch(supabase, items, drafts) {
       continue
     }
 
-    const { error } = await supabase.from('editorial_stories').insert(row)
+    const { data: insertedRows, error } = await supabase.from('editorial_stories').insert(row).select('id')
     if (error) {
       if (String(error.message || '').toLowerCase().includes('duplicate')) continue
       errors.push({ source: item.source_name, title: item.title, error: error.message })
       continue
     }
-    results.push({ published: true, title: row.headline, source: item.source_name })
+
+    // Video metadata is optional so older databases remain fully compatible.
+    // If the table has the newer video columns, populate them; otherwise the
+    // article is still published normally and the feed can detect embedded video.
+    if (item.video_url && insertedRows?.[0]?.id) {
+      const videoUpdate = await supabase
+        .from('editorial_stories')
+        .update({ video_url: item.video_url, media_type: 'video' })
+        .eq('id', insertedRows[0].id)
+      if (videoUpdate.error) {
+        console.warn('editorial-scan: optional video metadata was not stored:', videoUpdate.error.message)
+      }
+    }
+
+    results.push({ published: true, title: row.headline, source: item.source_name, video: Boolean(item.video_url) })
   }
 
   return { results, errors }

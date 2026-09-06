@@ -18,6 +18,9 @@ type Story = {
   source_name?: string;
   source_url?: string;
   image_url?: string;
+  video_url?: string;
+  video_id?: string;
+  media_type?: string;
   published_at?: string;
 };
 
@@ -66,6 +69,8 @@ export default function App() {
   const playRequestRef = useRef(0);
   const radioAdvancingRef = useRef(false);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const radioResumeKeyRef = useRef("");
+  const radioResumePositionRef = useRef<number | null>(null);
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -185,6 +190,25 @@ export default function App() {
     }
   };
 
+  const getRadioPositionKey = (trackKey: string) =>
+    `ftc-radio-position:${trackKey}`;
+
+  const saveCurrentRadioPosition = () => {
+    const audio = audioRef.current;
+    const trackKey = audio?.dataset.radioTrackKey;
+
+    if (!audio || !trackKey || !Number.isFinite(audio.currentTime)) {
+      return;
+    }
+
+    try {
+      localStorage.setItem(
+        getRadioPositionKey(trackKey),
+        String(Math.max(0, audio.currentTime)),
+      );
+    } catch {}
+  };
+
   /*
    * ------------------------------------------------------------
    * PLAY EXACT CURRENT TRACK
@@ -237,9 +261,34 @@ export default function App() {
       loadedSrcRef.current !== src ||
       audio.src !== absolute
     ) {
+      const trackKey = getTrackKey(track);
+      const shouldResumeSavedPosition =
+        radioResumeKeyRef.current === trackKey;
+
+      saveCurrentRadioPosition();
+
       try {
         audio.pause();
       } catch {}
+
+      audio.dataset.radioTrackKey = trackKey;
+      audio.dataset.radioResume =
+        shouldResumeSavedPosition ? "1" : "0";
+
+      if (shouldResumeSavedPosition) {
+        const savedPosition =
+          radioResumePositionRef.current;
+
+        if (
+          savedPosition !== null &&
+          Number.isFinite(savedPosition)
+        ) {
+          audio.dataset.radioResumePosition =
+            String(savedPosition);
+        }
+      } else {
+        delete audio.dataset.radioResumePosition;
+      }
 
       audio.src = src;
       loadedSrcRef.current = src;
@@ -532,6 +581,11 @@ export default function App() {
         getTrackKey(current);
 
       if (current.src) {
+        try {
+          localStorage.removeItem(
+            getRadioPositionKey(currentKey),
+          );
+        } catch {}
         const nextHistory = [
           current,
           ...radioHistory.filter(
@@ -649,13 +703,29 @@ export default function App() {
           ? differentArtist
           : candidates;
 
-      const shuffled = [
-        ...pool,
-      ].sort(
-        () =>
-          Math.random() -
-          0.5
-      );
+      const queuedNext =
+        upNextTracks[0];
+
+      const shuffled = queuedNext
+        ? [
+            queuedNext,
+            ...pool
+              .filter(
+                (candidate) =>
+                  candidate.key !==
+                  queuedNext.key
+              )
+              .sort(
+                () =>
+                  Math.random() -
+                  0.5
+              ),
+          ]
+        : [...pool].sort(
+            () =>
+              Math.random() -
+              0.5
+          );
 
       let started = false;
 
@@ -817,6 +887,27 @@ export default function App() {
         } catch {}
 
         if (restoredIndex >= 0) {
+          const restoredTrack = tracks[restoredIndex];
+          const restoredKey = getTrackKey(restoredTrack);
+
+          radioResumeKeyRef.current = restoredKey;
+
+          try {
+            const savedPosition = Number(
+              localStorage.getItem(
+                getRadioPositionKey(restoredKey),
+              ) || "",
+            );
+
+            radioResumePositionRef.current =
+              Number.isFinite(savedPosition) &&
+              savedPosition > 0
+                ? savedPosition
+                : null;
+          } catch {
+            radioResumePositionRef.current = null;
+          }
+
           setRadioIndex(restoredIndex);
         } else {
           setRadioIndex(() => {
@@ -897,6 +988,63 @@ export default function App() {
       );
     } catch {}
   }, [radioVolume]);
+
+  /*
+   * Persist the exact playback position so an accidental refresh
+   * can resume the same song from the same point.
+   */
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) {
+      return;
+    }
+
+    const restorePosition = () => {
+      if (audio.dataset.radioResume !== "1") {
+        return;
+      }
+
+      const savedPosition = Number(
+        audio.dataset.radioResumePosition || "",
+      );
+
+      if (
+        Number.isFinite(savedPosition) &&
+        savedPosition > 0 &&
+        Number.isFinite(audio.duration) &&
+        savedPosition < audio.duration - 1
+      ) {
+        try {
+          audio.currentTime = savedPosition;
+        } catch {}
+      }
+
+      delete audio.dataset.radioResume;
+      delete audio.dataset.radioResumePosition;
+      radioResumeKeyRef.current = "";
+      radioResumePositionRef.current = null;
+    };
+
+    const savePosition = () => {
+      saveCurrentRadioPosition();
+    };
+
+    const saveBeforeLeaving = () => {
+      saveCurrentRadioPosition();
+    };
+
+    audio.addEventListener("loadedmetadata", restorePosition);
+    audio.addEventListener("timeupdate", savePosition);
+    window.addEventListener("beforeunload", saveBeforeLeaving);
+    window.addEventListener("pagehide", saveBeforeLeaving);
+
+    return () => {
+      audio.removeEventListener("loadedmetadata", restorePosition);
+      audio.removeEventListener("timeupdate", savePosition);
+      window.removeEventListener("beforeunload", saveBeforeLeaving);
+      window.removeEventListener("pagehide", saveBeforeLeaving);
+    };
+  }, []);
 
   /*
    * Keep the station clock/programme display current without touching audio.
@@ -1202,6 +1350,65 @@ export default function App() {
       ].slice(0, 3);
     }, [stories]);
 
+  const videoStories =
+    useMemo(() => {
+      const isVideo = (story: Story) => {
+        const mediaType =
+          String(story.media_type || "").toLowerCase();
+
+        const url =
+          String(story.video_url || story.source_url || "").toLowerCase();
+
+        return (
+          mediaType.includes("video") ||
+          Boolean(story.video_url) ||
+          Boolean(story.video_id) ||
+          /youtube\.com|youtu\.be|vimeo\.com/.test(url)
+        );
+      };
+
+      return stories.filter(isVideo).slice(0, 4);
+    }, [stories]);
+
+  const getVideoEmbedUrl = (story: Story) => {
+    if (story.video_id) {
+      return `https://www.youtube.com/embed/${story.video_id}`;
+    }
+
+    const url = story.video_url || story.source_url || "";
+
+    try {
+      const parsed = new URL(url);
+
+      if (parsed.hostname.includes("youtu.be")) {
+        const id = parsed.pathname.replace(/^\//, "").split("/")[0];
+        return id
+          ? `https://www.youtube.com/embed/${id}`
+          : "";
+      }
+
+      if (parsed.hostname.includes("youtube.com")) {
+        const id =
+          parsed.searchParams.get("v") ||
+          parsed.pathname.match(/\/shorts\/([^/]+)/)?.[1] ||
+          parsed.pathname.match(/\/embed\/([^/]+)/)?.[1];
+
+        return id
+          ? `https://www.youtube.com/embed/${id}`
+          : "";
+      }
+
+      if (parsed.hostname.includes("vimeo.com")) {
+        const id = parsed.pathname.split("/").filter(Boolean)[0];
+        return id
+          ? `https://player.vimeo.com/video/${id}`
+          : "";
+      }
+    } catch {}
+
+    return "";
+  };
+
   /*
    * ------------------------------------------------------------
    * UP NEXT
@@ -1215,81 +1422,67 @@ export default function App() {
 
   const upNextTracks =
     useMemo(() => {
-      if (
-        !radioPlaylist.length
-      ) {
+      if (!radioPlaylist.length) {
         return [];
       }
 
-      const currentKey =
-        getTrackKey(
-          radioTrack
-        );
+      const currentIndex =
+        radioIndex >= 0 &&
+        radioIndex < radioPlaylist.length
+          ? radioIndex
+          : -1;
 
-      const recentKeys =
-        new Set([
-          currentKey,
-          ...radioHistory
-            .slice(0, 5)
-            .map(
-              getTrackKey
-            ),
-          ...playedKeys.slice(
-            -10
-          ),
-        ]);
+      const currentKey = getTrackKey(radioTrack);
 
-      const preferred =
-        radioPlaylist
-          .map(
-            (
-              track,
-              index
-            ) => ({
-              track,
-              index,
-              key: getTrackKey(
-                track
-              ),
-            })
-          )
-          .filter(
-            ({ key }) =>
-              !recentKeys.has(
-                key
-              )
-          );
+      const recentKeys = new Set([
+        currentKey,
+        ...radioHistory
+          .slice(0, 5)
+          .map(getTrackKey),
+      ]);
 
-      const fallback =
-        radioPlaylist
-          .map(
-            (
-              track,
-              index
-            ) => ({
-              track,
-              index,
-              key: getTrackKey(
-                track
-              ),
-            })
-          )
-          .filter(
-            ({ key }) =>
-              key !==
-              currentKey
-          );
+      const candidates = radioPlaylist
+        .map((track, index) => ({
+          track,
+          index,
+          key: getTrackKey(track),
+        }))
+        .filter(({ key }) => !recentKeys.has(key));
 
-      return (
-        preferred.length
-          ? preferred
-          : fallback
-      ).slice(0, 4);
+      if (currentIndex >= 0 && candidates.length) {
+        const total = radioPlaylist.length;
+
+        /*
+         * Sort by circular distance from the current track so
+         * UP NEXT always moves with the station's current track.
+         */
+        candidates.sort((a, b) => {
+          const distanceA =
+            (a.index - currentIndex + total) % total;
+          const distanceB =
+            (b.index - currentIndex + total) % total;
+
+          return distanceA - distanceB;
+        });
+      }
+
+      if (candidates.length) {
+        return candidates.slice(0, 4);
+      }
+
+      return radioPlaylist
+        .map((track, index) => ({
+          track,
+          index,
+          key: getTrackKey(track),
+        }))
+        .filter(({ key }) => key !== currentKey)
+        .slice(0, 4);
     }, [
       radioPlaylist,
+      radioIndex,
       radioTrack,
       radioHistory,
-      playedKeys,
     ]);
 
   const searchResults =
@@ -2784,27 +2977,72 @@ export default function App() {
           </div>
 
           <div className="video-grid">
-            {stories
-              .slice(0, 4)
-              .map(
-                (
-                  story,
-                  index
-                ) => (
+            {videoStories.map(
+              (
+                story,
+                index
+              ) => {
+                const embedUrl =
+                  getVideoEmbedUrl(
+                    story
+                  );
+
+                return (
                   <article
                     key={storyKey(
                       story
                     )}
                   >
-                    <img
-                      src={safeImage(
-                        story
-                      )}
-                      alt={storyTitle(
-                        story
-                      )}
-                      loading="lazy"
-                    />
+                    {embedUrl ? (
+                      <div
+                        style={{
+                          position: "relative",
+                          aspectRatio: "16 / 9",
+                          overflow: "hidden",
+                        }}
+                      >
+                        {/\.(mp4|webm|ogg)(?:$|[?#])/i.test(
+                          story.video_url || ""
+                        ) ? (
+                          <video
+                            src={story.video_url}
+                            controls
+                            playsInline
+                            preload="metadata"
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
+                          />
+                        ) : (
+                          <iframe
+                            src={embedUrl}
+                            title={storyTitle(
+                              story
+                            )}
+                            loading="lazy"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            allowFullScreen
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              border: 0,
+                            }}
+                          />
+                        )}
+                      </div>
+                    ) : (
+                      <img
+                        src={safeImage(
+                          story
+                        )}
+                        alt={storyTitle(
+                          story
+                        )}
+                        loading="lazy"
+                      />
+                    )}
 
                     <button
                       type="button"
@@ -2820,7 +3058,7 @@ export default function App() {
 
                       <div>
                         <small>
-                          FTC ORIGINALS · 0
+                          FTC VIDEO · 0
                           {index + 1}
                         </small>
 
@@ -2832,21 +3070,23 @@ export default function App() {
                       </div>
                     </button>
                   </article>
-                )
-              )}
+                );
+              }
+            )}
 
-            {!stories.length && (
+            {!videoStories.length && (
               <div className="empty-feed">
                 <strong>
-                  FTC ORIGINALS ARE
+                  FTC VIDEOS ARE
                   COMING INTO FOCUS.
                 </strong>
 
                 <p>
-                  New stories and
-                  original media will
-                  appear here as they
-                  are published.
+                  No video items are
+                  available in the live
+                  feed yet. Editorial
+                  articles are kept out
+                  of this section.
                 </p>
               </div>
             )}
