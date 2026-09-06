@@ -1,5 +1,12 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import cultureArt from "@/imports/for-the-culture.webp";
+import {
+  formatRadioTime,
+  getCurrentProgramme,
+  getNextProgramme,
+  getTodaySchedule,
+  RADIO_TIME_ZONE,
+} from "./radio/programming";
 
 type Story = {
   id?: string;
@@ -115,6 +122,8 @@ export default function App() {
 
   const [radioPausedByUser, setRadioPausedByUser] = useState(false);
 
+  const [radioClock, setRadioClock] = useState(() => new Date());
+
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -122,6 +131,15 @@ export default function App() {
   const [newsletterMessage, setNewsletterMessage] = useState("");
 
   const radioTrack = radioPlaylist[radioIndex] || fallbackTrack;
+  const currentProgramme = getCurrentProgramme(radioClock);
+  const nextProgramme = getNextProgramme(radioClock);
+  const todayRadioSchedule = getTodaySchedule(radioClock);
+  const stationClockLabel = new Intl.DateTimeFormat("en-NG", {
+    timeZone: RADIO_TIME_ZONE,
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  }).format(radioClock);
 
   /*
    * ------------------------------------------------------------
@@ -198,6 +216,11 @@ export default function App() {
     }
 
     setRadioIndex(index);
+
+    try {
+      localStorage.setItem("ftc-radio-current-track", getTrackKey(track));
+      localStorage.setItem("ftc-radio-track-index", String(index));
+    } catch {}
 
     const src = buildTrackSource(track);
     const absolute = new URL(src, window.location.href).href;
@@ -778,77 +801,36 @@ export default function App() {
         );
 
         /*
-         * Select an initial track.
+         * Restore the exact current track first.
          *
-         * Do NOT play automatically.
+         * The track identity is stored by source URL rather than only by
+         * numeric index because the generated playlist can change order when
+         * new MP3s are added. Only choose a new track when the saved track no
+         * longer exists (or this is the first visit).
          */
+        let restoredIndex = -1;
+        try {
+          const savedKey = localStorage.getItem("ftc-radio-current-track") || "";
+          if (savedKey) {
+            restoredIndex = tracks.findIndex((track) => getTrackKey(track) === savedKey);
+          }
+        } catch {}
 
-        setRadioIndex(() => {
-          const played =
-            new Set(
-              playedKeys
-            );
-
-          const recent =
-            new Set(
-              radioHistory
-                .slice(0, 8)
-                .map(
-                  getTrackKey
-                )
-            );
-
-          const fresh =
-            tracks
-              .map(
-                (
-                  track,
-                  index
-                ) => ({
-                  track,
-                  index,
-                  key: getTrackKey(
-                    track
-                  ),
-                })
-              )
-              .filter(
-                ({
-                  key,
-                }) =>
-                  !played.has(
-                    key
-                  ) &&
-                  !recent.has(
-                    key
-                  )
-              );
-
-          const pool =
-            fresh.length
+        if (restoredIndex >= 0) {
+          setRadioIndex(restoredIndex);
+        } else {
+          setRadioIndex(() => {
+            const played = new Set(playedKeys);
+            const recent = new Set(radioHistory.slice(0, 8).map(getTrackKey));
+            const fresh = tracks
+              .map((track, index) => ({ track, index, key: getTrackKey(track) }))
+              .filter(({ key }) => !played.has(key) && !recent.has(key));
+            const pool = fresh.length
               ? fresh
-              : tracks.map(
-                  (
-                    track,
-                    index
-                  ) => ({
-                    track,
-                    index,
-                    key: getTrackKey(
-                      track
-                    ),
-                  })
-                );
-
-          return (
-            pool[
-              Math.floor(
-                Math.random() *
-                  pool.length
-              )
-            ]?.index ?? 0
-          );
-        });
+              : tracks.map((track, index) => ({ track, index, key: getTrackKey(track) }));
+            return pool[Math.floor(Math.random() * pool.length)]?.index ?? 0;
+          });
+        }
       })
       .catch(() => {});
 
@@ -915,6 +897,14 @@ export default function App() {
       );
     } catch {}
   }, [radioVolume]);
+
+  /*
+   * Keep the station clock/programme display current without touching audio.
+   */
+  useEffect(() => {
+    const timer = window.setInterval(() => setRadioClock(new Date()), 30000);
+    return () => window.clearInterval(timer);
+  }, []);
 
   /*
    * Cleanup.
@@ -1409,7 +1399,7 @@ export default function App() {
     <div className="ftc-app">
       <audio
         ref={audioRef}
-        preload="none"
+        preload="metadata"
         playsInline
         onEnded={() => {
           if (
@@ -2621,6 +2611,46 @@ export default function App() {
                   </small>
                 </div>
               )}
+
+            <div className="radio-side-heading" style={{ marginTop: "1.5rem" }}>
+              <span>ON AIR NOW</span>
+              <small>{stationClockLabel} | AFRICA/LAGOS</small>
+            </div>
+
+            <div className="up-next-track">
+              <div>
+                <strong>{currentProgramme.title}</strong>
+                <small>
+                  {currentProgramme.host || "FOR THE CULTURE RADIO"} | {formatRadioTime(currentProgramme.start)} - {formatRadioTime(currentProgramme.end)}
+                </small>
+              </div>
+            </div>
+
+            <div className="radio-side-heading" style={{ marginTop: "1rem" }}>
+              <span>NEXT PROGRAMME</span>
+              <small>{formatRadioTime(nextProgramme.start)}</small>
+            </div>
+
+            <div className="up-next-track">
+              <div>
+                <strong>{nextProgramme.title}</strong>
+                <small>
+                  {nextProgramme.host || "FOR THE CULTURE RADIO"} | {nextProgramme.tagline}
+                </small>
+              </div>
+            </div>
+
+            <details style={{ marginTop: "1rem" }}>
+              <summary>TODAY'S SCHEDULE</summary>
+              <div style={{ marginTop: "0.75rem" }}>
+                {todayRadioSchedule.map((programme) => (
+                  <div key={`${programme.id}-${programme.start}`} style={{ padding: "0.45rem 0", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
+                    <strong style={{ display: "block" }}>{programme.title}</strong>
+                    <small>{formatRadioTime(programme.start)} - {formatRadioTime(programme.end)} | {programme.host || "OPEN ROTATION"}</small>
+                  </div>
+                ))}
+              </div>
+            </details>
           </div>
         </section>
 

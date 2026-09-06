@@ -8,7 +8,8 @@ const SOURCES = [
   { name: 'NotJustOk', url: process.env.EDITORIAL_NOTJUSTOK_FEED || 'https://notjustok.com/feed/', weight: 13 },
   { name: 'tooXclusive', url: process.env.EDITORIAL_TOOXCLUSIVE_FEED || 'https://tooxclusive.com/feed/', weight: 11 },
   { name: 'Naijaloaded', url: process.env.EDITORIAL_NAIJALOADED_FEED || 'https://www.naijaloaded.com.ng/feed/', weight: 10 },
-  // Nigerian news
+
+  // Nigerian news / entertainment
   { name: 'PUNCH Latest News', url: 'https://rss.punchng.com/v1/category/latest_news', weight: 10 },
   { name: 'PUNCH Entertainment', url: 'https://rss.punchng.com/v1/category/entertainment', weight: 11 },
   { name: 'PUNCH Business', url: 'https://rss.punchng.com/v1/category/business', weight: 9 },
@@ -20,11 +21,19 @@ const SOURCES = [
   { name: 'Nairametrics', url: process.env.EDITORIAL_NAIRAMETRICS_FEED || 'https://nairametrics.com/rss', weight: 8 },
   { name: 'Premium Times', url: process.env.EDITORIAL_PREMIUM_TIMES_FEED || 'https://www.premiumtimesng.com/feed', weight: 9 },
   { name: 'TheCable', url: process.env.EDITORIAL_THECABLE_FEED || 'https://www.thecable.ng/feed', weight: 8 },
-  // Africa / technology
-  { name: 'Africanews', url: process.env.EDITORIAL_AFRICANEWS_FEED || 'https://www.africanews.com/feed/', weight: 8 },
-  { name: 'TechCabal', url: process.env.EDITORIAL_TECHCABAL_FEED || 'https://techcabal.com/feed/', weight: 7 },
-]
 
+  // New Nigerian / African music and culture sources
+  { name: 'AceWorldTEAM', url: 'https://aceworldteam.com/feed/', weight: 9 },
+  { name: 'MackNaija', url: 'https://macknaija.com/feed/', weight: 8 },
+  { name: 'Ghana Plug', url: 'https://www.ghanaplug.com/feed/', weight: 8 },
+  { name: 'Jukebox Music', url: 'https://jukeboxmusic.com.ng/feed/', weight: 8 },
+
+  // Pan-African culture / news
+  { name: 'Africanews', url: process.env.EDITORIAL_AFRICANEWS_FEED || 'https://www.africanews.com/feed/', weight: 8 },
+
+  // Technology / creative economy
+  { name: 'TechCabal', url: process.env.EDITORIAL_TECHCABAL_FEED || 'https://techcabal.com/feed/', weight: 7 }
+]
 const RELEVANCE_TERMS = [
   'music','artist','singer','rapper','producer','dj','album','single','ep','mixtape',
   'afrobeats','afrobeat','alte','hip-hop','hip hop','amapiano','fuji','highlife',
