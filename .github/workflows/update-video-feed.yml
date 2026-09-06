@@ -45,4 +45,5 @@ jobs:
             exit 0
           fi
           git commit -m "chore: update FTC video feed"
+          git pull --rebase origin main
           git push
