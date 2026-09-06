@@ -136,18 +136,6 @@ export default function App() {
   const [newsletterEmail, setNewsletterEmail] = useState("");
   const [newsletterMessage, setNewsletterMessage] = useState("");
 
-  const [submissionOpen, setSubmissionOpen] = useState(false);
-  const [submissionName, setSubmissionName] = useState("");
-  const [submissionEmail, setSubmissionEmail] = useState("");
-  const [submissionArtist, setSubmissionArtist] = useState("");
-  const [submissionType, setSubmissionType] = useState("Music");
-  const [submissionTitle, setSubmissionTitle] = useState("");
-  const [submissionDescription, setSubmissionDescription] = useState("");
-  const [submissionLink, setSubmissionLink] = useState("");
-  const [submissionSocial, setSubmissionSocial] = useState("");
-  const [submissionAdditional, setSubmissionAdditional] = useState("");
-  const [submissionMessage, setSubmissionMessage] = useState("");
-
   const radioTrack = radioPlaylist[radioIndex] || fallbackTrack;
   const currentProgramme = getCurrentProgramme(radioClock);
   const nextProgramme = getNextProgramme(radioClock);
@@ -1363,32 +1351,6 @@ export default function App() {
 
   /*
    * ------------------------------------------------------------
-   * CONTENT SUBMISSION MODAL
-   * ------------------------------------------------------------
-   */
-
-  useEffect(() => {
-    if (!submissionOpen) {
-      return;
-    }
-
-    const close = (event: KeyboardEvent) => {
-      if (event.key === "Escape") {
-        setSubmissionOpen(false);
-      }
-    };
-
-    document.body.style.overflow = "hidden";
-    window.addEventListener("keydown", close);
-
-    return () => {
-      document.body.style.overflow = "";
-      window.removeEventListener("keydown", close);
-    };
-  }, [submissionOpen]);
-
-  /*
-   * ------------------------------------------------------------
    * CONTENT
    * ------------------------------------------------------------
    */
@@ -1625,57 +1587,6 @@ export default function App() {
     );
 
     setNewsletterEmail("");
-  };
-
-  const submitContent = (
-    event: React.FormEvent
-  ) => {
-    event.preventDefault();
-
-    if (
-      !submissionName.trim() ||
-      !submissionEmail.includes("@") ||
-      !submissionTitle.trim() ||
-      !submissionDescription.trim() ||
-      !submissionLink.trim()
-    ) {
-      setSubmissionMessage(
-        "Please complete all required fields."
-      );
-      return;
-    }
-
-    const subject = encodeURIComponent(
-      `FTC CONTENT SUBMISSION — ${submissionType} — ${submissionTitle.trim()}`
-    );
-
-    const body = encodeURIComponent(
-      [
-        "FOR THE CULTURE CONTENT SUBMISSION",
-        "",
-        `Name: ${submissionName.trim()}`,
-        `Email: ${submissionEmail.trim()}`,
-        `Artist / Brand / Organisation: ${submissionArtist.trim() || "Not provided"}`,
-        `Content Type: ${submissionType}`,
-        `Title: ${submissionTitle.trim()}`,
-        "",
-        "Description:",
-        submissionDescription.trim(),
-        "",
-        `Content Link: ${submissionLink.trim()}`,
-        `Social Handle(s): ${submissionSocial.trim() || "Not provided"}`,
-        "",
-        "Additional Information:",
-        submissionAdditional.trim() || "Not provided",
-      ].join("\n")
-    );
-
-    setSubmissionMessage(
-      "Opening your email app with the completed submission..."
-    );
-
-    window.location.href =
-      `mailto:fortheculture184@gmail.com?subject=${subject}&body=${body}`;
   };
 
   /*
@@ -3094,16 +3005,12 @@ export default function App() {
               feed.
             </p>
 
-            <button
-              type="button"
+            <a
               className="secondary-button"
-              onClick={() => {
-                setSubmissionMessage("");
-                setSubmissionOpen(true);
-              }}
+              href="#events"
             >
-              SUBMIT CONTENT →
-            </button>
+              EXPLORE ORIGINALS →
+            </a>
           </div>
 
           <div className="video-grid">
@@ -3493,6 +3400,15 @@ export default function App() {
       </footer>
 
       {/* ------------------------------------------------------
+          IMPORTANT:
+          THE LARGE RADIO DRAWER HAS BEEN COMPLETELY REMOVED.
+          
+          There is NO radio-drawer JSX here.
+          The compact now-playing bar above is now the
+          ONLY radio player interface.
+      ------------------------------------------------------- */}
+
+      {/* ------------------------------------------------------
           STORY READER
       ------------------------------------------------------- */}
 
@@ -3528,38 +3444,14 @@ export default function App() {
               ×
             </button>
 
-            {getVideoEmbedUrl(readerStory) ? (
-              <div
-                style={{
-                  position: "relative",
-                  width: "100%",
-                  aspectRatio: "16 / 9",
-                  overflow: "hidden",
-                  background: "#000",
-                }}
-              >
-                <iframe
-                  src={getVideoEmbedUrl(readerStory)}
-                  title={storyTitle(readerStory)}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                  allowFullScreen
-                  style={{
-                    width: "100%",
-                    height: "100%",
-                    border: 0,
-                  }}
-                />
-              </div>
-            ) : (
-              <img
-                src={safeImage(
-                  readerStory
-                )}
-                alt={storyTitle(
-                  readerStory
-                )}
-              />
-            )}
+            <img
+              src={safeImage(
+                readerStory
+              )}
+              alt={storyTitle(
+                readerStory
+              )}
+            />
 
             <div className="reader-content">
               <div className="reader-meta">
@@ -3630,335 +3522,6 @@ export default function App() {
                   READ ORIGINAL SOURCE ↗
                 </a>
               )}
-            </div>
-          </article>
-        </div>
-      )}
-
-      {/* ------------------------------------------------------
-          CONTENT SUBMISSION
-      ------------------------------------------------------- */}
-
-      {submissionOpen && (
-        <div
-          className="reader-overlay"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="submission-title"
-        >
-          <button
-            type="button"
-            className="reader-backdrop"
-            onClick={() => setSubmissionOpen(false)}
-            aria-label="Close submission form"
-          />
-
-          <article className="reader-card">
-            <button
-              type="button"
-              className="reader-close"
-              onClick={() => setSubmissionOpen(false)}
-              aria-label="Close submission form"
-            >
-              ×
-            </button>
-
-            <div className="reader-content">
-              <div className="reader-meta">
-                <span>FTC ORIGINALS</span>
-                <span>SUBMIT CONTENT</span>
-              </div>
-
-              <h2 id="submission-title">
-                PUT YOUR WORK IN FRONT OF THE CULTURE.
-              </h2>
-
-              <p className="reader-dek">
-                Send us your music, film, art, fashion, events,
-                stories and creative work for consideration by
-                the FOR THE CULTURE team.
-              </p>
-
-              <form onSubmit={submitContent}>
-                <div
-                  style={{
-                    display: "grid",
-                    gap: "0.9rem",
-                  }}
-                >
-                  <label
-                    style={{
-                      display: "grid",
-                      gap: "0.35rem",
-                    }}
-                  >
-                    <span>Name *</span>
-                    <input
-                      type="text"
-                      value={submissionName}
-                      onChange={(event) =>
-                        setSubmissionName(event.target.value)
-                      }
-                      placeholder="Your name"
-                      required
-                      style={{
-                        width: "100%",
-                        boxSizing: "border-box",
-                        padding: "0.9rem 1rem",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        background: "rgba(255,255,255,0.04)",
-                        color: "inherit",
-                        font: "inherit",
-                      }}
-                    />
-                  </label>
-
-                  <label
-                    style={{
-                      display: "grid",
-                      gap: "0.35rem",
-                    }}
-                  >
-                    <span>Email *</span>
-                    <input
-                      type="email"
-                      value={submissionEmail}
-                      onChange={(event) =>
-                        setSubmissionEmail(event.target.value)
-                      }
-                      placeholder="you@example.com"
-                      required
-                      style={{
-                        width: "100%",
-                        boxSizing: "border-box",
-                        padding: "0.9rem 1rem",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        background: "rgba(255,255,255,0.04)",
-                        color: "inherit",
-                        font: "inherit",
-                      }}
-                    />
-                  </label>
-
-                  <label
-                    style={{
-                      display: "grid",
-                      gap: "0.35rem",
-                    }}
-                  >
-                    <span>Artist / Brand / Organisation</span>
-                    <input
-                      type="text"
-                      value={submissionArtist}
-                      onChange={(event) =>
-                        setSubmissionArtist(event.target.value)
-                      }
-                      placeholder="Who are you submitting for?"
-                      style={{
-                        width: "100%",
-                        boxSizing: "border-box",
-                        padding: "0.9rem 1rem",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        background: "rgba(255,255,255,0.04)",
-                        color: "inherit",
-                        font: "inherit",
-                      }}
-                    />
-                  </label>
-
-                  <label
-                    style={{
-                      display: "grid",
-                      gap: "0.35rem",
-                    }}
-                  >
-                    <span>Content Type *</span>
-                    <select
-                      value={submissionType}
-                      onChange={(event) =>
-                        setSubmissionType(event.target.value)
-                      }
-                      required
-                      style={{
-                        width: "100%",
-                        boxSizing: "border-box",
-                        padding: "0.9rem 1rem",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        background: "rgba(255,255,255,0.04)",
-                        color: "inherit",
-                        font: "inherit",
-                      }}
-                    >
-                      <option value="Music">Music</option>
-                      <option value="Music Video">Music Video</option>
-                      <option value="Film / Short Film">
-                        Film / Short Film
-                      </option>
-                      <option value="Interview">Interview</option>
-                      <option value="Art / Photography">
-                        Art / Photography
-                      </option>
-                      <option value="Fashion">Fashion</option>
-                      <option value="Event">Event</option>
-                      <option value="Editorial / Article">
-                        Editorial / Article
-                      </option>
-                      <option value="Creative Project">
-                        Creative Project
-                      </option>
-                      <option value="Other">Other</option>
-                    </select>
-                  </label>
-
-                  <label
-                    style={{
-                      display: "grid",
-                      gap: "0.35rem",
-                    }}
-                  >
-                    <span>Submission Title *</span>
-                    <input
-                      type="text"
-                      value={submissionTitle}
-                      onChange={(event) =>
-                        setSubmissionTitle(event.target.value)
-                      }
-                      placeholder="Title of your work"
-                      required
-                      style={{
-                        width: "100%",
-                        boxSizing: "border-box",
-                        padding: "0.9rem 1rem",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        background: "rgba(255,255,255,0.04)",
-                        color: "inherit",
-                        font: "inherit",
-                      }}
-                    />
-                  </label>
-
-                  <label
-                    style={{
-                      display: "grid",
-                      gap: "0.35rem",
-                    }}
-                  >
-                    <span>Description *</span>
-                    <textarea
-                      value={submissionDescription}
-                      onChange={(event) =>
-                        setSubmissionDescription(event.target.value)
-                      }
-                      placeholder="Tell us about the work..."
-                      rows={5}
-                      required
-                      style={{
-                        width: "100%",
-                        boxSizing: "border-box",
-                        padding: "0.9rem 1rem",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        background: "rgba(255,255,255,0.04)",
-                        color: "inherit",
-                        font: "inherit",
-                        resize: "vertical",
-                      }}
-                    />
-                  </label>
-
-                  <label
-                    style={{
-                      display: "grid",
-                      gap: "0.35rem",
-                    }}
-                  >
-                    <span>Content Link *</span>
-                    <input
-                      type="url"
-                      value={submissionLink}
-                      onChange={(event) =>
-                        setSubmissionLink(event.target.value)
-                      }
-                      placeholder="https://..."
-                      required
-                      style={{
-                        width: "100%",
-                        boxSizing: "border-box",
-                        padding: "0.9rem 1rem",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        background: "rgba(255,255,255,0.04)",
-                        color: "inherit",
-                        font: "inherit",
-                      }}
-                    />
-                  </label>
-
-                  <label
-                    style={{
-                      display: "grid",
-                      gap: "0.35rem",
-                    }}
-                  >
-                    <span>Social Handle(s)</span>
-                    <input
-                      type="text"
-                      value={submissionSocial}
-                      onChange={(event) =>
-                        setSubmissionSocial(event.target.value)
-                      }
-                      placeholder="@yourhandle"
-                      style={{
-                        width: "100%",
-                        boxSizing: "border-box",
-                        padding: "0.9rem 1rem",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        background: "rgba(255,255,255,0.04)",
-                        color: "inherit",
-                        font: "inherit",
-                      }}
-                    />
-                  </label>
-
-                  <label
-                    style={{
-                      display: "grid",
-                      gap: "0.35rem",
-                    }}
-                  >
-                    <span>Additional Information</span>
-                    <textarea
-                      value={submissionAdditional}
-                      onChange={(event) =>
-                        setSubmissionAdditional(event.target.value)
-                      }
-                      placeholder="Anything else the FTC team should know?"
-                      rows={4}
-                      style={{
-                        width: "100%",
-                        boxSizing: "border-box",
-                        padding: "0.9rem 1rem",
-                        border: "1px solid rgba(255,255,255,0.15)",
-                        background: "rgba(255,255,255,0.04)",
-                        color: "inherit",
-                        font: "inherit",
-                        resize: "vertical",
-                      }}
-                    />
-                  </label>
-
-                  {submissionMessage && (
-                    <small>
-                      {submissionMessage}
-                    </small>
-                  )}
-
-                  <button
-                    type="submit"
-                    className="primary-button"
-                  >
-                    SEND SUBMISSION →
-                  </button>
-                </div>
-              </form>
             </div>
           </article>
         </div>
