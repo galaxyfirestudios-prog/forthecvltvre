@@ -1265,7 +1265,7 @@ export default function App() {
 
     const loadVideos = async () => {
       try {
-        const response = await fetch('/api/video-feed?limit=12', {
+        const response = await fetch('/video-feed.json', {
           headers: { Accept: 'application/json' },
           cache: 'no-store',
         });
@@ -1273,7 +1273,9 @@ export default function App() {
         if (!response.ok) return;
 
         const data = await response.json();
-        const videos = Array.isArray(data?.videos) ? data.videos : [];
+        const videos = Array.isArray(data?.videos)
+          ? data.videos.slice(0, 12)
+          : [];
 
         if (!cancelled) {
           setVideoStories(videos);
