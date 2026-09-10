@@ -48,6 +48,8 @@ const fallbackTrack: Track = {
   src: "",
 };
 
+const RADIO_CURRENT_TRACK_MAX_AGE_MS = 30 * 60 * 1000;
+
 function formatDate(value?: string) {
   if (!value) return "LATEST";
 
@@ -257,6 +259,10 @@ export default function App() {
     try {
       localStorage.setItem("ftc-radio-current-track", getTrackKey(track));
       localStorage.setItem("ftc-radio-track-index", String(index));
+      localStorage.setItem(
+        "ftc-radio-current-track-at",
+        String(Date.now()),
+      );
     } catch {}
 
     const src = buildTrackSource(track);
@@ -716,8 +722,16 @@ export default function App() {
           ? differentArtist
           : candidates;
 
-      const queuedNext =
+      const queuedNextCandidate =
         upNextTracks[0];
+
+      const queuedNext =
+        queuedNextCandidate &&
+        !recentArtists.has(
+          getArtistKey(queuedNextCandidate.track),
+        )
+          ? queuedNextCandidate
+          : undefined;
 
       const shuffled = queuedNext
         ? [
@@ -892,14 +906,30 @@ export default function App() {
          * longer exists (or this is the first visit).
          */
         let restoredIndex = -1;
+        let savedTrackIsFresh = false;
         try {
           const savedKey = localStorage.getItem("ftc-radio-current-track") || "";
-          if (savedKey) {
-            restoredIndex = tracks.findIndex((track) => getTrackKey(track) === savedKey);
+          const savedAt = Number(
+            localStorage.getItem("ftc-radio-current-track-at") || "",
+          );
+
+          savedTrackIsFresh =
+            Boolean(savedKey) &&
+            Number.isFinite(savedAt) &&
+            Date.now() - savedAt < RADIO_CURRENT_TRACK_MAX_AGE_MS;
+
+          if (savedTrackIsFresh && savedKey) {
+            restoredIndex = tracks.findIndex(
+              (track) => getTrackKey(track) === savedKey,
+            );
+          } else {
+            localStorage.removeItem("ftc-radio-current-track");
+            localStorage.removeItem("ftc-radio-track-index");
+            localStorage.removeItem("ftc-radio-current-track-at");
           }
         } catch {}
 
-        if (restoredIndex >= 0) {
+        if (restoredIndex >= 0 && savedTrackIsFresh) {
           const restoredTrack = tracks[restoredIndex];
           const restoredKey = getTrackKey(restoredTrack);
 
@@ -1524,14 +1554,35 @@ export default function App() {
         }))
         .filter(({ key }) => !recentKeys.has(key));
 
-      if (currentIndex >= 0 && candidates.length) {
+      /*
+       * Keep the station from lining up two songs by the same
+       * artist when another artist is available.
+       */
+      const recentArtists = new Set(
+        [
+          radioTrack,
+          ...radioHistory.slice(0, 2),
+        ]
+          .map(getArtistKey)
+          .filter(Boolean),
+      );
+
+      const artistSeparatedCandidates = candidates.filter(
+        ({ track }) => !recentArtists.has(getArtistKey(track)),
+      );
+
+      const pool = artistSeparatedCandidates.length
+        ? artistSeparatedCandidates
+        : candidates;
+
+      if (currentIndex >= 0 && pool.length) {
         const total = radioPlaylist.length;
 
         /*
          * Sort by circular distance from the current track so
          * UP NEXT always moves with the station's current track.
          */
-        candidates.sort((a, b) => {
+        pool.sort((a, b) => {
           const distanceA =
             (a.index - currentIndex + total) % total;
           const distanceB =
@@ -1541,8 +1592,8 @@ export default function App() {
         });
       }
 
-      if (candidates.length) {
-        return candidates.slice(0, 4);
+      if (pool.length) {
+        return pool.slice(0, 4);
       }
 
       return radioPlaylist
@@ -1620,9 +1671,20 @@ export default function App() {
       return;
     }
 
-    setNewsletterMessage(
-      "You're on the list. Welcome to the movement."
+    const email = newsletterEmail.trim();
+    const subject = encodeURIComponent(
+      "FOR THE CULTURE NEWSLETTER SUBSCRIPTION",
     );
+    const body = encodeURIComponent(
+      `Please add ${email} to the FOR THE CULTURE newsletter/subscriber list.`,
+    );
+
+    setNewsletterMessage(
+      "Opening your email app to complete your subscription..."
+    );
+
+    window.location.href =
+      `mailto:fortheculture184@gmail.com?subject=${subject}&body=${body}`;
 
     setNewsletterEmail("");
   };
@@ -2007,7 +2069,7 @@ export default function App() {
 
               <a
                 className="secondary-button"
-                href="#radio"
+                href="#radio-section"
               >
                 ▣ VIEW SCHEDULE
               </a>
@@ -2842,7 +2904,7 @@ export default function App() {
 
               <a
                 className="secondary-button"
-                href="#radio"
+                href="#radio-section"
               >
                 VIEW SCHEDULE
               </a>
@@ -3398,7 +3460,7 @@ export default function App() {
               EXPLORE
             </span>
 
-            <a href="#radio">
+            <a href="#radio-section">
               Radio
             </a>
 
