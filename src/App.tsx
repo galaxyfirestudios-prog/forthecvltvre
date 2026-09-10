@@ -73,7 +73,6 @@ export default function App() {
   const retryTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const radioResumeKeyRef = useRef("");
   const radioResumePositionRef = useRef<number | null>(null);
-  const radioBackgroundPlayingRef = useRef(false);
 
   const [menuOpen, setMenuOpen] = useState(false);
 
@@ -328,25 +327,11 @@ export default function App() {
       }
 
       setRadioPlaying(true);
-      radioBackgroundPlayingRef.current = true;
-
-      if ("mediaSession" in navigator) {
-        try {
-          navigator.mediaSession.playbackState = "playing";
-        } catch {}
-      }
 
       return true;
     } catch {
       if (requestId === playRequestRef.current) {
         setRadioPlaying(false);
-        radioBackgroundPlayingRef.current = false;
-
-        if ("mediaSession" in navigator) {
-          try {
-            navigator.mediaSession.playbackState = "paused";
-          } catch {}
-        }
       }
 
       return false;
@@ -523,13 +508,6 @@ export default function App() {
       }
 
       setRadioPlaying(true);
-      radioBackgroundPlayingRef.current = true;
-
-      if ("mediaSession" in navigator) {
-        try {
-          navigator.mediaSession.playbackState = "playing";
-        } catch {}
-      }
 
       return true;
     } catch {
@@ -538,13 +516,6 @@ export default function App() {
         playRequestRef.current
       ) {
         setRadioPlaying(false);
-        radioBackgroundPlayingRef.current = false;
-
-        if ("mediaSession" in navigator) {
-          try {
-            navigator.mediaSession.playbackState = "paused";
-          } catch {}
-        }
       }
 
       return false;
@@ -576,13 +547,6 @@ export default function App() {
 
     setRadioPlaying(false);
     setRadioPausedByUser(true);
-    radioBackgroundPlayingRef.current = false;
-
-    if ("mediaSession" in navigator) {
-      try {
-        navigator.mediaSession.playbackState = "paused";
-      } catch {}
-    }
   };
 
   /*
@@ -1118,172 +1082,6 @@ export default function App() {
     const timer = window.setInterval(() => setRadioClock(new Date()), 30000);
     return () => window.clearInterval(timer);
   }, []);
-
-  /*
-   * ------------------------------------------------------------
-   * BACKGROUND / LOCK-SCREEN RADIO
-   * ------------------------------------------------------------
-   *
-   * Do not pause the station when the page is backgrounded or the
-   * screen is locked. Supported browsers can keep HTML audio alive
-   * in the background when the device/OS allows it.
-   *
-   * Media Session supplies lock-screen / headset controls and keeps
-   * the station represented as an active media session.
-   *
-   * A webpage cannot prevent true system sleep on a computer. If the
-   * OS puts the whole machine into sleep, browser audio is suspended
-   * by the operating system. Screen-off/lock and tab backgrounding
-   * are the cases this code is designed to support.
-   */
-
-  useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) {
-      return;
-    }
-
-    const updateMediaSession = () => {
-      if (!("mediaSession" in navigator)) {
-        return;
-      }
-
-      try {
-        navigator.mediaSession.metadata = new MediaMetadata({
-          title: radioTrack.title || "FOR THE CULTURE LIVE",
-          artist: radioTrack.artist || "FOR THE CULTURE RADIO",
-          album: radioTrack.show || "FOR THE CULTURE",
-          artwork: [
-            {
-              src: radioPoster,
-              sizes: "512x512",
-              type: "image/webp",
-            },
-          ],
-        });
-      } catch {}
-    };
-
-    const installMediaSessionHandlers = () => {
-      if (!("mediaSession" in navigator)) {
-        return;
-      }
-
-      try {
-        navigator.mediaSession.setActionHandler("play", () => {
-          void startRadio(true);
-        });
-      } catch {}
-
-      try {
-        navigator.mediaSession.setActionHandler("pause", () => {
-          pauseRadio();
-        });
-      } catch {}
-
-      try {
-        navigator.mediaSession.setActionHandler("stop", () => {
-          pauseRadio();
-        });
-      } catch {}
-    };
-
-    const handlePlay = () => {
-      radioBackgroundPlayingRef.current = true;
-
-      if ("mediaSession" in navigator) {
-        try {
-          navigator.mediaSession.playbackState = "playing";
-        } catch {}
-      }
-    };
-
-    const handlePause = () => {
-      /*
-       * A pause caused by the browser/OS while backgrounded is not
-       * the same thing as the listener pressing PAUSE.
-       */
-      if (!radioPausedByUser) {
-        radioBackgroundPlayingRef.current = true;
-      }
-
-      if ("mediaSession" in navigator) {
-        try {
-          navigator.mediaSession.playbackState = "paused";
-        } catch {}
-      }
-    };
-
-    const handleVisibilityChange = () => {
-      if (document.visibilityState !== "visible") {
-        return;
-      }
-
-      /*
-       * If the browser temporarily suspended the audio while the
-       * screen was locked/backgrounded, resume the SAME current
-       * track when the browser makes audio available again.
-       */
-      if (
-        radioBackgroundPlayingRef.current &&
-        !radioPausedByUser &&
-        audio.paused
-      ) {
-        void startRadio(false);
-      }
-    };
-
-    updateMediaSession();
-    installMediaSessionHandlers();
-
-    audio.addEventListener("play", handlePlay);
-    audio.addEventListener("pause", handlePause);
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-
-    return () => {
-      audio.removeEventListener("play", handlePlay);
-      audio.removeEventListener("pause", handlePause);
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-    };
-  }, [
-    radioTrack,
-    radioPoster,
-    radioPausedByUser,
-  ]);
-
-  /*
-   * Keep lock-screen metadata and playback state current as the
-   * station changes tracks.
-   */
-
-  useEffect(() => {
-    if (!("mediaSession" in navigator)) {
-      return;
-    }
-
-    try {
-      navigator.mediaSession.metadata = new MediaMetadata({
-        title: radioTrack.title || "FOR THE CULTURE LIVE",
-        artist: radioTrack.artist || "FOR THE CULTURE RADIO",
-        album: radioTrack.show || "FOR THE CULTURE",
-        artwork: [
-          {
-            src: radioPoster,
-            sizes: "512x512",
-            type: "image/webp",
-          },
-        ],
-      });
-
-      navigator.mediaSession.playbackState = radioPlaying
-        ? "playing"
-        : "paused";
-    } catch {}
-  }, [
-    radioTrack,
-    radioPoster,
-    radioPlaying,
-  ]);
 
   /*
    * Cleanup.
@@ -1968,9 +1766,8 @@ export default function App() {
     <div className="ftc-app">
       <audio
         ref={audioRef}
-        preload="auto"
+        preload="metadata"
         playsInline
-        aria-label="FOR THE CULTURE LIVE RADIO"
         onEnded={() => {
           if (
             !radioPausedByUser
