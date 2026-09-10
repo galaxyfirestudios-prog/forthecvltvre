@@ -722,32 +722,18 @@ export default function App() {
           ? differentArtist
           : candidates;
 
-      const queuedNextCandidate =
-        upNextTracks[0];
+      /*
+       * UP NEXT is the station queue.
+       *
+       * The first item shown in UP NEXT must be the exact
+       * first item the engine attempts when this song ends.
+       * Do not reshuffle it here or the display can disagree
+       * with the song that actually plays.
+       */
+      const queuedCandidates = upNextTracks;
 
-      const queuedNext =
-        queuedNextCandidate &&
-        !recentArtists.has(
-          getArtistKey(queuedNextCandidate.track),
-        )
-          ? queuedNextCandidate
-          : undefined;
-
-      const shuffled = queuedNext
-        ? [
-            queuedNext,
-            ...pool
-              .filter(
-                (candidate) =>
-                  candidate.key !==
-                  queuedNext.key
-              )
-              .sort(
-                () =>
-                  Math.random() -
-                  0.5
-              ),
-          ]
+      const shuffled = queuedCandidates.length
+        ? queuedCandidates
         : [...pool].sort(
             () =>
               Math.random() -
