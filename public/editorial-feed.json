@@ -1,6 +1,54 @@
 {
   "stories": [
     {
+      "id": "ftc-1789642254731-0",
+      "source_name": "Africanews",
+      "source_url": "http://www.africanews.com/2026/09/17/african-risk-premium-au-launches-own-credit-rating-agency-business-africa/",
+      "source_title": "'African risk premium': AU launches own credit rating agency [Business Africa]",
+      "source_excerpt": "African countries face some of the world’s highest borrowing costs, with ratings driving up interest and cutting off access to international capital. Now the African Union is fighting back with its own credit rating agency",
+      "image_url": "http://images.euronews.com/articles/stories/09/88/02/50/640x360_cmsv2_9d76d6c1-2b03-5474-aa99-1e57811ec937-9880250.jpg?1787129038",
+      "source_published_at": "2026-09-17T09:17:00.000Z",
+      "relevance_score": 37,
+      "headline": "African Union Targets Excessive Borrowing Costs With Indigenous Credit Rating Agency",
+      "dek": "The African Union has launched its own credit rating agency to combat the soaring interest rates and capital barriers that disproportionately impact African nations.",
+      "body": "African nations have long contended with some of the most burdensome borrowing expenses globally, driven by traditional international evaluation models that restrict foreign capital access. According to reports from Africanews, the African Union is actively pushing back against these systemic financial disadvantages by introducing an indigenous credit rating agency. This strategic institutional rollout is designed to reshape how continental economic health is assessed on the global stage. By establishing an independent framework to evaluate financial risk, the initiative seeks to dismantle the punitive 'African risk premium' that has historically inflated debt servicing obligations. Economic stakeholders across the region anticipate that this home-grown approach will foster fairer evaluations and unlock vital international financial flows for developing markets.",
+      "category": "BUSINESS",
+      "status": "published",
+      "published_at": "2026-09-17T10:50:54.731Z"
+    },
+    {
+      "id": "ftc-1789642254731-1",
+      "source_name": "Premium Times",
+      "source_url": "https://www.premiumtimesng.com/news/top-news/910292-police-propose-new-desk-to-protect-nigerias-creative-economy.html",
+      "source_title": "Police propose new desk to protect Nigeria’s creative economy",
+      "source_excerpt": "The Inspector-General of Police has proposed a specialised desk to coordinate security and intellectual property protection in Nigeria’s growing creative economy. The post Police propose new desk to protect Nigeria’s creative economy appeared first on Premium Times Nigeria .",
+      "image_url": "https://i0.wp.com/media.premiumtimesng.com/wp-content/files/2026/09/592132.jpg?fit=960%2C613&amp;ssl=1",
+      "source_published_at": "2026-09-17T09:04:21.000Z",
+      "relevance_score": 40,
+      "headline": "Nigerian Police Propose Dedicated Desk To Safeguard Expanding Creative Economy",
+      "dek": "The Inspector-General of Police has put forward a specialized security unit focused on protecting intellectual property and safety within Nigeria's booming creative sector.",
+      "body": "Nigeria's vibrant creative ecosystem is set to receive a targeted layer of institutional protection under a new security proposal. Premium Times reports that the Inspector-General of Police has advanced plans to establish a specialized desk dedicated to managing safety concerns and safeguarding intellectual property rights across the nation's rapidly expanding entertainment and artistic industries. As the country's cultural output gains unprecedented global prominence, creators have increasingly vocalized the need for robust institutional frameworks to secure their assets and professional output. The proposed specialized unit aims to bridge the gap between law enforcement and the creative community, offering a structured approach to combating intellectual property theft and ensuring a secure environment for artists, musicians, and industry operators to thrive.",
+      "category": "ART",
+      "status": "published",
+      "published_at": "2026-09-17T10:50:54.731Z"
+    },
+    {
+      "id": "ftc-1789642254731-2",
+      "source_name": "Nairametrics",
+      "source_url": "https://nairametrics.com/2026/09/17/court-jails-south-african-for-25-years-for-importing-5-75kg-heroin-into-nigeria/",
+      "source_title": "Court jails South African for 25 years for importing 5.75kg heroin into Nigeria",
+      "source_excerpt": "The Federal High Court in Abuja on Thursday sentenced a 38-year-old South African woman to 25 years in prison for smuggling 5.75 kilogrammes of heroin into Nigeria through the Nnamdi Azikiwe International Airport in Abuja. Justice Obiora Egwuatu passed the sentence, stressing that Nigerian law does not respect emotions. In August, the National Drug Law […] The post Court jails South African for 25 years for importing 5.75kg heroin into Nigeria appeared first on Nairametrics .",
+      "image_url": "https://cdn.nairametrics.com/wp-content/uploads/2026/07/BREAKING.webp",
+      "source_published_at": "2026-09-17T10:14:14.000Z",
+      "relevance_score": 39,
+      "headline": "Abuja Court Sentences South African Woman To 25 Years For Heroin Trafficking",
+      "dek": "Justice Obiora Egwuatu handed down the lengthy prison term at the Federal High Court in Abuja following an illegal importation attempt via the international airport.",
+      "body": "A 38-year-old South African national has been handed a 25-year prison sentence by the Federal High Court in Abuja for smuggling illicit substances into Nigeria. Nairametrics reports that the defendant was convicted of importing 5.75 kilogrammes of heroin through the Nnamdi Azikiwe International Airport. Presiding over the case, Justice Obiora Egwuatu delivered the strict penalty while emphasizing that the judiciary operates strictly within the confines of the law without emotional bias. The ruling follows ongoing anti-narcotics enforcement efforts across major transit hubs in the country, underscoring the severe legal repercussions individuals face for international drug trafficking offenses under Nigerian legislation.",
+      "category": "NEWS",
+      "status": "published",
+      "published_at": "2026-09-17T10:50:54.731Z"
+    },
+    {
       "id": "ftc-1789614117480-0",
       "source_name": "Premium Times",
       "source_url": "https://www.premiumtimesng.com/features-and-interviews/910225-interview-why-nigerians-remain-vulnerable-to-xenophobia-in-south-africa-how-governments-can-change-the-narrative-acting-high-commissioner-temitope-ajayi.html",
@@ -911,57 +959,9 @@
       "category": "MUSIC",
       "status": "published",
       "published_at": "2026-09-13T15:29:58.610Z"
-    },
-    {
-      "id": "ftc-1789313398610-1",
-      "source_name": "Nairametrics",
-      "source_url": "https://nairametrics.com/2026/09/13/tinubu-turns-to-brics-for-ai-digital-infrastructure-and-critical-minerals-investment/",
-      "source_title": "Tinubu turns to BRICS for AI, digital infrastructure and critical minerals investment",
-      "source_excerpt": "Nigeria’s President Bola Tinubu has called for deeper cooperation with BRICS countries in artificial intelligence, digital public infrastructure, fintech, telecommunications, critical minerals and advanced manufacturing, as the Federal Government seeks to attract investment and accelerate economic transformation. The post Tinubu turns to BRICS for AI, digital infrastructure and critical minerals investment appeared first on Nairametrics .",
-      "image_url": "https://cdn.nairametrics.com/wp-content/uploads/2026/08/Tinubu-scaled.jpg",
-      "source_published_at": "2026-09-13T12:44:12.000Z",
-      "relevance_score": 40,
-      "headline": "President Tinubu Targets BRICS Partnership for Tech and Mineral Growth",
-      "dek": "Nigeria looks to strengthen economic transformation by courting international investment in critical minerals and digital infrastructure.",
-      "body": "Nigeria is actively pursuing strategic partnerships to drive its economic transformation forward. According to reports from Nairametrics, President Bola Tinubu has formally advocated for intensified collaboration with BRICS member nations. The diplomatic push focuses on vital sectors of the modern economy, including artificial intelligence, robust digital public infrastructure, telecommunications, and advanced manufacturing. Beyond technology, the federal administration is also setting its sights on attracting substantial foreign investments into fintech and critical minerals. By reaching out to the bloc, the government aims to position the nation at the forefront of technological advancement and industrial growth. This strategic economic pivot highlights Nigeria's ongoing commitment to building a digitally empowered and diversified economy for the future.",
-      "category": "BUSINESS",
-      "status": "published",
-      "published_at": "2026-09-13T15:29:58.610Z"
-    },
-    {
-      "id": "ftc-1789297119628-0",
-      "source_name": "NotJustOk",
-      "source_url": "https://notjustok.com/songs/ajebo-hustlers-gyakie-365-days/",
-      "source_title": "Ajebo Hustlers and Gyakie join forces for '365 Days'",
-      "source_excerpt": "Nigeria's premier duo Ajebo Hustlers have teamed up with Ghanaian songstress Gyakie for a soulful, cross-border single titled 365 Days. Bringing together the duo's distinct Kpos street-soul style with Gyakie's warm, honeyed R&B vocals, the record delivers an intimate, relatable soundtrack for modern romance. The production on 365 Days is a lush, mid-tempo blend of […] The post Ajebo Hustlers and Gyakie join forces for '365 Days' appeared first on NotjustOk .",
-      "image_url": "https://notjustok.com/wp-content/uploads/2026/09/IMG_1042-1440x720.jpeg",
-      "source_published_at": "2026-09-12T12:26:29.000Z",
-      "relevance_score": 36,
-      "headline": "Ajebo Hustlers and Gyakie Unveil New Collaborative Track '365 Days'",
-      "dek": "Nigerian music duo Ajebo Hustlers join forces with Ghanaian songstress Gyakie for a fresh cross-border single.",
-      "body": "The vibrant African music landscape welcomes another exciting international collaboration as Nigeria's acclaimed duo Ajebo Hustlers team up with talented Ghanaian songstress Gyakie. According to reports from NotJustOk, the newly released single is titled '365 Days' and showcases a compelling fusion of distinct musical backgrounds.\n\nKnown for their signature Kpos street-soul style, the Nigerian pair brings a gritty yet melodic foundation to the track. Meanwhile, Gyakie complements the instrumentation with her characteristically warm and honeyed R&B vocal delivery, creating a balanced dynamic between the featured artists.\n\nMusically, '365 Days' arrives as a lush, mid-tempo production designed to offer listeners an intimate and relatable listening experience centered around modern romance. The collaborative effort highlights the ongoing creative bridges being built between Nigerian and Ghanaian artists within the contemporary African music scene.\n\nAs the single makes its way to streaming platforms, fans of both acts can expect a rich sonic blend that highlights the versatility of West African talent. The release further cements the growing trend of borderless musical partnerships driving the region's global appeal.",
-      "category": "MUSIC",
-      "status": "published",
-      "published_at": "2026-09-13T10:58:39.628Z"
-    },
-    {
-      "id": "ftc-1789297119628-1",
-      "source_name": "Nairametrics",
-      "source_url": "https://nairametrics.com/2026/09/13/dangote-refinery-ipo-faces-valuation-test-as-n2-15-trillion-offer-opens/",
-      "source_title": "Dangote Refinery IPO faces valuation test as N2.15 trillion offer opens",
-      "source_excerpt": "Financial market analysts have expressed differing views on the valuation of the Dangote Petroleum Refinery Initial Public Offering (IPO), while largely agreeing that the transaction is set to deepen Nigeria’s capital market and attract a new generation of investors. The post Dangote Refinery IPO faces valuation test as N2.15 trillion offer opens appeared first on Nairametrics .",
-      "image_url": "https://cdn.nairametrics.com/wp-content/uploads/2026/09/IMG_3479.jpeg",
-      "source_published_at": "2026-09-13T08:32:28.000Z",
-      "relevance_score": 35,
-      "headline": "Dangote Refinery N2.15 Trillion IPO Opens Amid Market Valuation Debates",
-      "dek": "Financial analysts share mixed perspectives on the valuation of the massive public offering while anticipating a boost for the Nigerian capital market.",
-      "body": "The Nigerian financial sector is experiencing a significant milestone as the initial public offering for the Dangote Petroleum Refinery officially opens. Financial market analysts have begun weighing in on the colossal N2.15 trillion transaction, offering varying viewpoints regarding the pricing and overall valuation of the asset.\n\nDespite the diverse opinions among market watchers, a broad consensus exists regarding the potential positive impact of the listing. Industry observers widely agree that the mega-offering is well-positioned to significantly deepen Nigeria's capital market infrastructure.\n\nFurthermore, market participants anticipate that an offering of this scale will play a crucial role in drawing a fresh wave of retail and institutional participants into the investment ecosystem. The massive public offering represents one of the most closely watched financial events in the country's recent economic history.\n\nAs trading activity unfolds around the N2.15 trillion offer, stakeholders will continue to monitor how the market digests the valuation metrics. The performance of the IPO is expected to serve as a major bellwether for future large-scale capital raises within the region.",
-      "category": "BUSINESS",
-      "status": "published",
-      "published_at": "2026-09-13T10:58:39.628Z"
     }
   ],
   "count": 60,
   "source": "FOR THE CULTURE Editorial Engine",
-  "generated_at": "2026-09-17T03:01:57.481Z"
+  "generated_at": "2026-09-17T10:50:54.732Z"
 }
