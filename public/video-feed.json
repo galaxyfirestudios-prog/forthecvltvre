@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-09-24T23:03:03.727Z",
+  "generated_at": "2026-09-25T01:31:46.327Z",
   "source": "FOR THE CULTURE YouTube Video Engine (public RSS)",
   "count": 60,
   "videos": [
@@ -965,6 +965,10 @@
     }
   ],
   "source_errors": [
+    {
+      "source": "TRACE Naija",
+      "error": "HTTP 500"
+    },
     {
       "source": "Audiomack Africa",
       "error": "HTTP 404"
