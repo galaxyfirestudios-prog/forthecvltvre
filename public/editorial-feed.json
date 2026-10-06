@@ -1,6 +1,54 @@
 {
   "stories": [
     {
+      "id": "ftc-1791290288659-0",
+      "source_name": "Africanews",
+      "source_url": "http://www.africanews.com/2026/10/06/nigeria-air-force-lowers-plane-crash-toll-to-25-civilians-among-victims/",
+      "source_title": "Nigeria air force lowers plane crash toll to 25, civilians among victims",
+      "source_excerpt": "The Nigerian Air Force on Tuesday said 25 people died in the crash of one of its planes a day earlier, lowering a previous death toll. No survivors were found. Civilian family members travelling aboard the plane were among the victims.",
+      "image_url": "http://images.euronews.com/articles/stories/09/94/13/12/640x360_cmsv2_2259111d-7a06-5953-b2f4-a9ac961f5119-9941312.jpg?1791281762",
+      "source_published_at": "2026-10-06T11:22:19.000Z",
+      "relevance_score": 34,
+      "headline": "Nigerian Air Force Revises Plane Crash Toll Downward to 25",
+      "dek": "Tragic military aircraft incident claims 25 lives, including civilian family members traveling onboard, with no survivors reported.",
+      "body": "The Nigerian Air Force has confirmed that 25 individuals lost their lives in a devastating plane crash that occurred a day prior. In an official update released on Tuesday, military authorities revised the earlier death toll downward to 25 total fatalities. According to the report, no survivors were found at the site of the wreckage. The incident has brought deep grief as it was revealed that civilian family members traveling aboard the aircraft were among those who perished. Africanews provided the initial reports regarding the updated casualty numbers and the presence of civilian passengers on the ill-fated flight.",
+      "category": "NEWS",
+      "status": "published",
+      "published_at": "2026-10-06T12:38:08.659Z"
+    },
+    {
+      "id": "ftc-1791290288659-1",
+      "source_name": "Premium Times",
+      "source_url": "https://www.premiumtimesng.com/entertainment/music/914851-dapper-beats-ybnl-starboy-mavin-in-mid-year-market-share-ranking.html",
+      "source_title": "Dapper beats YBNL, Starboy, Mavin in mid-year market-share ranking",
+      "source_excerpt": "The Lagos-based record label retained its lead among Nigerian-owned music firms. The post Dapper beats YBNL, Starboy, Mavin in mid-year market-share ranking appeared first on Premium Times Nigeria .",
+      "image_url": "https://i0.wp.com/media.premiumtimesng.com/wp-content/files/2026/10/WhatsApp-Image-2026-10-06-at-12.05.06.jpeg?fit=769%2C536&amp;ssl=1",
+      "source_published_at": "2026-10-06T11:14:59.000Z",
+      "relevance_score": 42,
+      "headline": "Dapper Secures Top Spot in Mid-Year Market Share Rankings",
+      "dek": "The Lagos-based label outpaced major competitors including YBNL, Starboy, and Mavin to lead Nigerian-owned music firms.",
+      "body": "The competitive landscape of the Nigerian music industry has shifted as mid-year market-share rankings place Dapper ahead of several industry heavyweights. According to recent reports published by Premium Times, the Lagos-based record label successfully claimed the leading position among indigenous music firms. In doing so, Dapper outperformed prominent powerhouses such as YBNL, Starboy, and Mavin. This milestone highlights the growing influence and commercial strength of the label within the vibrant ecosystem of Nigerian music. Industry watchers continue to monitor how these domestic music firms shape the broader cultural and business landscape across the continent.",
+      "category": "MUSIC",
+      "status": "published",
+      "published_at": "2026-10-06T12:38:08.659Z"
+    },
+    {
+      "id": "ftc-1791290288659-2",
+      "source_name": "NotJustOk",
+      "source_url": "https://notjustok.com/sports/caf-apologises-super-eagles-bans-guinea-bissau-stadium/",
+      "source_title": "CAF apologises to NFF bans Guinea-Bissau's stadium",
+      "source_excerpt": "The body governing football in Africa, Confederation of African Football (CAF) has reportedly apologised to the Nigeria Football Federation (NFF) over the poor condition of the pitch that they played in against Guinea-Bissau. CAF confirmed the ban on Guinea-Bissau’s Estádio Nacional 24 de Setembro, where the Super Eagles suffered a 3-0 defeat in the 2027 […] The post CAF apologises to NFF bans Guinea-Bissau's stadium appeared first on NotjustOk .",
+      "image_url": "https://notjustok.com/wp-content/uploads/2026/10/HT4nChmWoAA1jJj-1440x720.jpg",
+      "source_published_at": "2026-10-05T19:10:36.000Z",
+      "relevance_score": 41,
+      "headline": "CAF Issues Apology to NFF and Bans Guinea-Bissau Venue",
+      "dek": "African football governing body takes action following pitch conditions and the Super Eagles' recent qualification match defeat.",
+      "body": "The Confederation of African Football has officially reached out to the Nigeria Football Federation with an apology concerning the unsatisfactory condition of a match pitch. Reporting from NotJustOk indicates that the governing body addressed issues stemming from a fixture involving the Super Eagles. Alongside the apology, CAF confirmed a strict ban on Guinea-Bissau's Estádio Nacional 24 de Setembro. The venue previously hosted the encounter where the Super Eagles sustained a 3-0 defeat during qualification matches for the 2027 tournament. The decision underscores ongoing scrutiny regarding stadium standards and pitch quality across international fixtures governed by the continental body.",
+      "category": "SPORTS",
+      "status": "published",
+      "published_at": "2026-10-06T12:38:08.659Z"
+    },
+    {
       "id": "ftc-1791260920544-0",
       "source_name": "TechCabal",
       "source_url": "https://techcabal.com/2026/10/05/jse-tia-tech-sme-investment-readiness/",
@@ -911,57 +959,9 @@
       "category": "NEWS",
       "status": "published",
       "published_at": "2026-10-02T11:46:33.024Z"
-    },
-    {
-      "id": "ftc-1790941593024-2",
-      "source_name": "NotJustOk",
-      "source_url": "https://notjustok.com/songs/mr-eazi-moliy-comfort/",
-      "source_title": "Mr Eazi and MOLIY pair up for 'Comfort'",
-      "source_excerpt": "Mr Eazi has released his latest offering, Comfort, featuring Ghanaian-American singer MOLIY. Released via emPawa Africa, The buoyant, cross-border Afro-fusion tune brings together two artists whose careers reflect Ghana's continuing influence on global Afropop. MOLIY is the breakout voice behind the global hit Shake It to the Max (FLY), which crossed one billion streams on […] The post Mr Eazi and MOLIY pair up for 'Comfort' appeared first on NotjustOk .",
-      "image_url": "https://notjustok.com/wp-content/uploads/2026/10/Mr-Eazi-and-MOLIY-1440x720.jpeg",
-      "source_published_at": "2026-10-02T07:29:19.000Z",
-      "relevance_score": 43,
-      "headline": "Mr Eazi and MOLIY Collaborate on Vibrant New Cross-Border Afro-Fusion Single 'Comfort'",
-      "dek": "The emPawa Africa release unites two prominent acts highlighting the enduring cultural footprint of Ghanaian sounds on the global stage.",
-      "body": "As reported by NotJustOk, artist Mr Eazi has dropped a fresh track titled 'Comfort', featuring the acclaimed Ghanaian-American vocalist MOLIY. Distributed via emPawa Africa, the buoyant Afro-fusion collaboration highlights the prominent role Ghana continues to play in shaping modern global Afropop. MOLIY brings her distinctive global appeal to the record, following her massive success as the breakout voice behind the viral hit 'Shake It to the Max (FLY)', which famously surpassed one billion streams. The partnership between these two acts underscores the creative synergy driving contemporary cross-border music projects across the continent. Fans and critics alike have welcomed the release as another strong addition to the growing catalogue of collaborative pan-African records. By blending their unique styles, Mr Eazi and MOLIY continue to expand the reach and sonic boundaries of the genre internationally. The new single is now available for listeners across major streaming platforms, further cementing both artists' ongoing influence in the global music scene.",
-      "category": "MUSIC",
-      "status": "published",
-      "published_at": "2026-10-02T11:46:33.024Z"
-    },
-    {
-      "id": "ftc-1790941593024-3",
-      "source_name": "The NATIVE Music",
-      "source_url": "https://thenativemag.com/johnny-drille-joins-coca-cola-to-celebrate-75th-nigerian-anniversary-with-we-still-dey-here/",
-      "source_title": "Johnny Drille Joins Coca-Cola To Celebrate 75th Nigerian Anniversary With “We Still Dey”",
-      "source_excerpt": "Coca-Cola frames its 75-year Nigerian history as one that has unfolded alongside Nigeria's own changing cultural landscape. The post Johnny Drille Joins Coca-Cola To Celebrate 75th Nigerian Anniversary With “We Still Dey” appeared first on The NATIVE .",
-      "image_url": "https://thenativemag.com/wp-content/uploads/2026/10/CKFI.jpg.jpeg",
-      "source_published_at": "2026-10-02T10:24:47.000Z",
-      "relevance_score": 41,
-      "headline": "Johnny Drille Partners With Coca-Cola for 75th Nigerian Anniversary Release “We Still Dey”",
-      "dek": "The collaboration marks three-quarters of a century of corporate history intersecting with the country's evolving cultural identity.",
-      "body": "According to The NATIVE Music, singer Johnny Drille has teamed up with beverage giant Coca-Cola to release a commemorative track titled “We Still Dey”. The project coincides with Coca-Cola marking seventy-five years of operations within the country. In framing this milestone, the brand highlights how its long-term presence has unfolded side-by-side with the shifting cultural and creative landscapes of Nigeria. Johnny Drille lends his signature vocal artistry to the anniversary track, celebrating resilience and endurance through music. The collaboration bridges commercial brand heritage with contemporary Nigerian artistry, paying homage to decades of shared history. Industry observers note that such partnerships reflect how local creative talents continue to anchor major cultural moments and milestone celebrations. “We Still Dey” stands as a testament to both the longevity of the brand's footprint and the vibrant evolution of the local music scene. Fans of the singer can experience the celebratory release as part of the broader nationwide anniversary activities.",
-      "category": "ENTERTAINMENT",
-      "status": "published",
-      "published_at": "2026-10-02T11:46:33.024Z"
-    },
-    {
-      "id": "ftc-1790912585651-0",
-      "source_name": "Africanews",
-      "source_url": "http://www.africanews.com/2026/10/01/nigerias-president-hails-economic-reforms-ahead-of-bid-for-reelection/",
-      "source_title": "Nigeria's president hails economic reforms ahead of bid for reelection",
-      "source_excerpt": "President Bola Tinubu lauded that the country had overcome major challenges since he assumed office in 2023 while he remains unpopular among young Nigerians with his reelection bid around the corner",
-      "image_url": "http://images.euronews.com/articles/stories/09/93/52/99/640x360_cmsv2_8c6506d0-b986-5000-9c69-d04998038656-9935299.jpg?1790851259",
-      "source_published_at": "2026-10-01T12:47:09.000Z",
-      "relevance_score": 32,
-      "headline": "Nigerian Leader Defends Policies As Reelection Campaign Approaches",
-      "dek": "President Bola Tinubu recently praised the administration's fiscal adjustments despite facing significant pushback from the country's youth demographic.",
-      "body": "As the political landscape heats up ahead of upcoming elections, Nigerian President Bola Tinubu has stepped forward to champion his administration's economic policy record. According to Africanews, the leader asserted that the nation has successfully weathered substantial economic hurdles ever since he took power in 2023. These remarks come at a crucial political juncture as the incumbent leader prepares to launch his bid for a second term in office. However, the path forward may prove politically challenging. Despite the administration's optimistic assessment of its financial trajectory, the president continues to face a notable lack of popularity among young Nigerians. This sentiment among the younger demographic will likely play a defining role as political campaigns ramp up across the federation. Observers are watching closely to see how the administration addresses these youth concerns while simultaneously campaigning on its reform agenda. The coming months will undoubtedly test the resilience of both the nation's economic strategy and its political leadership as the electorate prepares to cast their ballots.",
-      "category": "NEWS",
-      "status": "published",
-      "published_at": "2026-10-02T03:43:05.651Z"
     }
   ],
   "count": 60,
   "source": "FOR THE CULTURE Editorial Engine",
-  "generated_at": "2026-10-06T04:28:40.544Z"
+  "generated_at": "2026-10-06T12:38:08.660Z"
 }
