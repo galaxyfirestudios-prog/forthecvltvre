@@ -1,6 +1,54 @@
 {
   "stories": [
     {
+      "id": "ftc-1791260920544-0",
+      "source_name": "TechCabal",
+      "source_url": "https://techcabal.com/2026/10/05/jse-tia-tech-sme-investment-readiness/",
+      "source_title": "JSE wants to turn 10 South African tech SMEs into investor-ready businesses",
+      "source_excerpt": "The Johannesburg Stock Exchange and Technology Innovation Agency have launched a 16-week pilot to help 10 South African tech SMEs become investment-ready, access new markets and connect with potential sources of capital.",
+      "image_url": "https://c76c7bbc41.mjedge.net/wp-content/uploads/tc/2026/10/IMG_4259-1-2-1024x581.webp",
+      "source_published_at": "2026-10-05T16:13:35.000Z",
+      "relevance_score": 34,
+      "headline": "Johannesburg Stock Exchange launches pilot to boost local tech SMEs",
+      "dek": "A newly introduced sixteen-week program aims to prepare ten South African technology enterprises for future investments.",
+      "body": "The Johannesburg Stock Exchange has joined forces with the Technology Innovation Agency to roll out a specialized sixteen-week pilot initiative. Designed specifically for ten local technology small and medium-sized enterprises, the program focuses on building investment readiness. Through this collaborative effort, participating businesses will gain valuable support to navigate new markets and build direct connections with prospective capital providers. By targeting these high-potential enterprises, the organizers aim to bridge the gap between early-stage innovation and sustainable funding. As the pilot progresses, it could establish a crucial framework for nurturing the broader South African technology ecosystem.",
+      "category": "BUSINESS",
+      "status": "published",
+      "published_at": "2026-10-06T04:28:40.544Z"
+    },
+    {
+      "id": "ftc-1791260920544-1",
+      "source_name": "Nairametrics",
+      "source_url": "https://nairametrics.com/2026/10/05/fg-completes-10-diagnostic-centres-plans-six-specialty-hospitals-nationwide/",
+      "source_title": "FG completes 10 diagnostic centres, plans six specialty hospitals nationwide",
+      "source_excerpt": "The Federal Government says it has established 10 radio-diagnostic centres across Nigeria and plans to establish a multi-specialty hospital in each of the country’s six geopolitical zones as part of efforts to expand access to specialised healthcare. The post FG completes 10 diagnostic centres, plans six specialty hospitals nationwide appeared first on Nairametrics .",
+      "image_url": "https://media.nairametrics.com/2025/08/Muhammad-Ali-Pate.jpg",
+      "source_published_at": "2026-10-05T14:19:48.000Z",
+      "relevance_score": 33,
+      "headline": "Federal Government finalizes ten diagnostic facilities and outlines hospital expansion",
+      "dek": "New radio-diagnostic centers and planned multi-specialty hospitals are set to transform healthcare delivery across the country.",
+      "body": "Efforts to improve specialized healthcare infrastructure in Nigeria have reached a new milestone with the completion of ten radio-diagnostic facilities nationwide. According to official reports, these newly established centers form part of a broader strategy to enhance medical diagnostic capabilities across different regions. In addition to these facilities, the Federal Government has unveiled plans to construct a multi-specialty hospital in every one of the nation's six geopolitical zones. This dual approach aims to address critical gaps in specialized medical access and reduce the reliance on overseas treatments. While full implementation will take time, these infrastructure updates mark a significant step toward nationwide healthcare modernization.",
+      "category": "NEWS",
+      "status": "published",
+      "published_at": "2026-10-06T04:28:40.544Z"
+    },
+    {
+      "id": "ftc-1791260920544-2",
+      "source_name": "Africanews",
+      "source_url": "http://www.africanews.com/2026/10/05/military-aircraft-with-32-people-on-board-crashes-in-southern-nigeria/",
+      "source_title": "Military aircraft with 32 people on board crashes in southern Nigeria",
+      "source_excerpt": "A military aircraft crashed Monday in southern Nigeria with 25 passengers and 7 crew members on board, triggering a frantic search and rescue operation, authorities said.",
+      "image_url": "http://images.euronews.com/articles/stories/09/93/99/89/640x360_cmsv2_8bc58403-4c56-59b0-88ea-92f8f5e8851a-9939989.jpg?1791211213",
+      "source_published_at": "2026-10-05T14:51:17.000Z",
+      "relevance_score": 29,
+      "headline": "Search and rescue underway following military plane crash in southern Nigeria",
+      "dek": "Emergency teams have been mobilized after an aircraft carrying thirty-two occupants went down in the southern region.",
+      "body": "Authorities have launched an urgent search and rescue operation following a military aircraft accident in southern Nigeria. Official statements confirm that the flight was carrying a total of thirty-two individuals, comprising twenty-five passengers and seven crew members, when the incident occurred on Monday. Emergency services rushed to the scene immediately, coordinating efforts to locate survivors and assess the situation. The sudden crash has prompted widespread concern, with response teams working tirelessly under challenging conditions. Further updates regarding the condition of those on board are expected as the rescue operation continues to unfold.",
+      "category": "NEWS",
+      "status": "published",
+      "published_at": "2026-10-06T04:28:40.544Z"
+    },
+    {
       "id": "ftc-1791243456897-3",
       "source_name": "Africanews",
       "source_url": "http://www.africanews.com/2026/10/05/ethiopia-federal-forces-advance-in-tigray-africanews-today/",
@@ -911,57 +959,9 @@
       "category": "NEWS",
       "status": "published",
       "published_at": "2026-10-02T03:43:05.651Z"
-    },
-    {
-      "id": "ftc-1790912585651-1",
-      "source_name": "TechCabal",
-      "source_url": "https://techcabal.com/2026/10/01/techcabal-daily-dangotes-cross-border-ipo-dash/",
-      "source_title": "👨🏿‍🚀TechCabal Daily – Dangote’s cross-border IPO dash",
-      "source_excerpt": "In today's edition: Kenyans may soon be able to buy Dangote shares || Woolworths is mastering dark store strategy || JPMorgan hires Sub-Saharan African lead || Is the JSE catching tech startups young?",
-      "image_url": "https://c76c7bbc41.mjedge.net/wp-content/uploads/tc/2024/08/tc-daily-banner.png",
-      "source_published_at": "2026-10-01T06:02:16.000Z",
-      "relevance_score": 32,
-      "headline": "Cross-Border IPOs And Retail Innovations Highlight Regional Markets",
-      "dek": "Recent market updates point to major corporate cross-border movements, evolving retail fulfillment models, and new leadership appointments across the continent.",
-      "body": "Business and market developments are capturing attention across multiple regions following recent updates highlighted by TechCabal. Among the notable financial movements, prospective retail investors in Kenya could soon have the opportunity to purchase shares in Dangote through a cross-border initial public offering dash. This potential offering signals a strong appetite for regional economic integration and expanded investor access. Meanwhile, in the retail sector, Woolworths is reportedly strengthening its operational capabilities by mastering a dark store strategy, reflecting how regional commerce continues to adapt to modern fulfillment demands. In corporate banking developments, JPMorgan has bolstered its regional footprint by appointing a new Sub-Saharan African lead. Additionally, discussions around venture funding and market ecosystems touch on whether the Johannesburg Stock Exchange is successfully engaging with technology startups at an early enough stage. These diverse financial and retail updates collectively underscore a dynamic period of transformation for businesses operating across the continent's major economic hubs.",
-      "category": "BUSINESS",
-      "status": "published",
-      "published_at": "2026-10-02T03:43:05.651Z"
-    },
-    {
-      "id": "ftc-1790912585651-2",
-      "source_name": "PUNCH Latest News",
-      "source_url": "https://punchng.com/obi-ill-spend-holidays-in-zamfara-borno-if-elected/?utm_source=rss.punchng.com&utm_medium=web",
-      "source_title": "Obi: I’ll spend holidays in Zamfara, Borno if elected",
-      "source_excerpt": "The presidential candidate of the Nigeria Democratic Congress, Peter Obi, has vowed not to spend his holidays outside Nigeria if elected President in the 2027 general elections. Obi pledged in his Independence Day address delivered in Abuja on Thursday, saying he would use his four-year tenure to travel across the country, interact with Nigerians and Read More: https://punchng.com/obi-ill-spend-holidays-in-zamfara-borno-if-elected/",
-      "image_url": "https://cdn.punchng.com/wp-content/uploads/2020/08/18131509/punch-logo-500x179-1.png",
-      "source_published_at": "2026-10-02T04:36:22.000Z",
-      "relevance_score": 40,
-      "headline": "Obi Vows Domestic Holiday Commitment During Independence Day Address",
-      "dek": "Nigeria Democratic Congress presidential candidate Peter Obi promised during an Abuja speech to spend his tenure exploring domestic regions rather than vacationing abroad.",
-      "body": "Nigeria Democratic Congress presidential hopeful Peter Obi has outlined a distinct vision for domestic engagement if he secures the presidency in the 2027 general elections. As reported by PUNCH Latest News, Obi used his Independence Day address delivered in Abuja on Thursday to make a striking personal commitment regarding his holiday plans. The presidential candidate vowed that he will completely avoid spending his vacation time outside of Nigeria if elected to lead the country. Instead, Obi pledged to utilize his prospective four-year presidential term to travel extensively throughout the nation's diverse regions. The stated goal of these domestic travels is to directly interact and engage with Nigerian citizens on the ground. Specifically, the candidate highlighted plans to spend his holiday periods in areas such as Zamfara and Borno. This campaign promise aims to demonstrate solidarity and firsthand understanding of local conditions across different parts of the country as the political field gears up for the 2027 electoral cycle.",
-      "category": "NEWS",
-      "status": "published",
-      "published_at": "2026-10-02T03:43:05.651Z"
-    },
-    {
-      "id": "ftc-1790912585651-3",
-      "source_name": "NotJustOk",
-      "source_url": "https://notjustok.com/sports/morocco-reportedly-set-to-host-afcon-2027/",
-      "source_title": "CAF reportedly set to move AFCON 2027 to Morocco",
-      "source_excerpt": "Morocco has reportedly emerged as a potential alternative host for the 2027 Africa Cup of Nations (AFCON) amid growing concerns over preparations in Kenya, Tanzania and Uganda Several reports say the Confederation of African Football (CAF) has contacted Morocco about stepping in if the three East African co-hosts fail to complete the required infrastructure and […] The post CAF reportedly set to move AFCON 2027 to Morocco appeared first on NotjustOk .",
-      "image_url": "https://notjustok.com/wp-content/uploads/2024/06/20240621_183635-1440x720.jpg",
-      "source_published_at": "2026-10-01T13:36:59.000Z",
-      "relevance_score": 38,
-      "headline": "Morocco Emerges As Potential Alternative Host For 2027 Africa Cup Of Nations",
-      "dek": "The Confederation of African Football has reportedly reached out to Morocco regarding potential tournament relocation due to infrastructure concerns in East Africa.",
-      "body": "Preparations for the 2027 Africa Cup of Nations face mounting uncertainty as Morocco reportedly steps into the spotlight as a potential alternative host. According to reports covered by NotJustOk, the Confederation of African Football has contacted Moroccan officials about the possibility of stepping in to stage the tournament. This development stems directly from growing concerns regarding the state of readiness in the original co-hosting nations of Kenya, Tanzania, and Uganda. Several reports indicate that CAF is monitoring whether these three East African nations can successfully complete the necessary stadium and tournament infrastructure in time for the competition. While Kenya, Tanzania, and Uganda were initially awarded the hosting rights, delays or difficulties in meeting strict requirements have forced continental football authorities to evaluate contingency plans. Morocco, boasting robust sporting infrastructure and recent major hosting experience, represents a ready alternative should the current co-hosts fail to deliver the mandated preparations. The sports community awaits official updates from CAF regarding whether a definitive shift in host nations will become necessary.",
-      "category": "SPORTS",
-      "status": "published",
-      "published_at": "2026-10-02T03:43:05.651Z"
     }
   ],
   "count": 60,
   "source": "FOR THE CULTURE Editorial Engine",
-  "generated_at": "2026-10-05T23:37:36.898Z"
+  "generated_at": "2026-10-06T04:28:40.544Z"
 }
