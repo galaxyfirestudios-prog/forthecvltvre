@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-15T22:24:24.462Z",
+  "generated_at": "2026-10-16T00:35:41.852Z",
   "source": "FOR THE CULTURE YouTube Video Engine (public RSS)",
   "count": 60,
   "videos": [
@@ -965,6 +965,14 @@
     }
   ],
   "source_errors": [
+    {
+      "source": "YFM South Africa",
+      "error": "HTTP 404"
+    },
+    {
+      "source": "SABC 1",
+      "error": "HTTP 404"
+    },
     {
       "source": "Audiomack Africa",
       "error": "HTTP 404"
