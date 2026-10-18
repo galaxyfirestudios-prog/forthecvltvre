@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-18T16:44:32.692Z",
+  "generated_at": "2026-10-18T18:59:35.285Z",
   "source": "FOR THE CULTURE YouTube Video Engine (public RSS)",
   "count": 60,
   "videos": [
@@ -724,22 +724,6 @@
       "relevance_score": 22
     },
     {
-      "video_id": "T6S9ADANN6g",
-      "title": "Luca Zuccoti - Slow Motion | THE BEAT BOX",
-      "headline": "Luca Zuccoti - Slow Motion | THE BEAT BOX",
-      "description": "Manchester-born Afrobeats talent Luca Zuccotti brings his smooth vocals, infectious melodies and genre-blending sound to the Beat Box stage for a captivating live rendition of (Slow Motion).\n\nBlending his R&B and Trap Soul influences with the rhythms of Afrobeats, Luca delivers an intimate performance that showcases the versatility and distinct musical identity behind his sound.\n\nWatch Luca Zuccotti bring [Slow Motion] to life on Beat Box, Beat FM’s live music platform.\n\nFull performance out now. 🎙️\n\nSubscribe now for exclusive interviews, trending moments and everything pop culture.\n\nWe’re everywhere you are 👉🏾 @thebeat999fm on Instagram, Twitter, Tiktok & Facebook.",
-      "dek": "Manchester-born Afrobeats talent Luca Zuccotti brings his smooth vocals, infectious melodies and genre-blending sound to the Beat Box stage for a captivating live rendition of (Slow Motion).\n\nBlending his R&B and Trap Soul influences with the rhythms of Afrobeats, Luca delivers an intimate performance that showcases the versatility and distinct musical identity behind his sound.\n\nWatch Luca Zuccotti bring [Slow Motion] to life on Beat Box, Beat FM’s live music platform.\n\nFull performance out now. 🎙️\n\nSubscribe now for exclusive interviews, trending moments and everything pop culture.\n\nWe’re everywhere you are 👉🏾 @thebeat999fm on Instagram, Twitter, Tiktok & Facebook.",
-      "source_name": "The Beat99.9 FM",
-      "source_url": "https://www.youtube.com/@thebeat999fm",
-      "video_url": "https://www.youtube.com/watch?v=T6S9ADANN6g",
-      "image_url": "https://i1.ytimg.com/vi/T6S9ADANN6g/hqdefault.jpg",
-      "published_at": "2026-09-10T17:00:06+00:00",
-      "category": "MUSIC",
-      "media_type": "video",
-      "region": "Nigeria",
-      "relevance_score": 22
-    },
-    {
       "video_id": "IsZ13mEV1QU",
       "title": "How Tosin Eniolorunda Built Moniepoint",
       "headline": "How Tosin Eniolorunda Built Moniepoint",
@@ -802,6 +786,22 @@
       "media_type": "video",
       "region": "Nigeria",
       "relevance_score": 21
+    },
+    {
+      "video_id": "ArHD8m9tRJg",
+      "title": "Highlights from Santan Dave’s Tour in Lagos",
+      "headline": "Highlights from Santan Dave’s Tour in Lagos",
+      "description": "",
+      "dek": "",
+      "source_name": "Zikoko",
+      "source_url": "https://www.youtube.com/@Zikoko",
+      "video_url": "https://www.youtube.com/watch?v=ArHD8m9tRJg",
+      "image_url": "https://i2.ytimg.com/vi/ArHD8m9tRJg/hqdefault.jpg",
+      "published_at": "2026-10-18T16:58:42+00:00",
+      "category": "CULTURE",
+      "media_type": "video",
+      "region": "Nigeria",
+      "relevance_score": 20
     },
     {
       "video_id": "SOoaEP_q2r8",
@@ -916,22 +916,6 @@
       "relevance_score": 17
     },
     {
-      "video_id": "i-awrICPfp0",
-      "title": "It’s really a High Fashion Moment",
-      "headline": "It’s really a High Fashion Moment",
-      "description": "",
-      "dek": "",
-      "source_name": "Zikoko",
-      "source_url": "https://www.youtube.com/@Zikoko",
-      "video_url": "https://www.youtube.com/watch?v=i-awrICPfp0",
-      "image_url": "https://i2.ytimg.com/vi/i-awrICPfp0/hqdefault.jpg",
-      "published_at": "2026-10-11T15:21:22+00:00",
-      "category": "STYLE",
-      "media_type": "video",
-      "region": "Nigeria",
-      "relevance_score": 17
-    },
-    {
       "video_id": "GE0BQAB4dCQ",
       "title": "Toje and Big Fish on the NdaniTGIFShow",
       "headline": "Toje and Big Fish on the NdaniTGIFShow",
@@ -959,6 +943,22 @@
       "image_url": "https://i3.ytimg.com/vi/2SHi5jgxfck/hqdefault.jpg",
       "published_at": "2026-10-02T19:14:42+00:00",
       "category": "STYLE",
+      "media_type": "video",
+      "region": "Nigeria",
+      "relevance_score": 17
+    },
+    {
+      "video_id": "P1SJ9kCZ7wA",
+      "title": "Deji Osikoya on Podcasting, Cancel Culture & the Power of Words | MY DAILY 2K",
+      "headline": "Deji Osikoya on Podcasting, Cancel Culture & the Power of Words | MY DAILY 2K",
+      "description": "From being conscious of getting cancelled to avoiding the word “allegedly,” Deji Osikoya opens up about his journey into podcasting, navigating conversations, and finding his voice in the space on this episode of #MyDaily2K. Watch!",
+      "dek": "From being conscious of getting cancelled to avoiding the word “allegedly,” Deji Osikoya opens up about his journey into podcasting, navigating conversations, and finding his voice in the space on this episode of #MyDaily2K. Watch!",
+      "source_name": "NdaniTV",
+      "source_url": "https://www.youtube.com/@ndanitv",
+      "video_url": "https://www.youtube.com/watch?v=P1SJ9kCZ7wA",
+      "image_url": "https://i1.ytimg.com/vi/P1SJ9kCZ7wA/hqdefault.jpg",
+      "published_at": "2026-09-23T11:00:24+00:00",
+      "category": "FILM",
       "media_type": "video",
       "region": "Nigeria",
       "relevance_score": 17
