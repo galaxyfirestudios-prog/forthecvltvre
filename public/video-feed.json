@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-20T17:59:07.600Z",
+  "generated_at": "2026-10-20T21:31:06.041Z",
   "source": "FOR THE CULTURE YouTube Video Engine (public RSS)",
   "count": 60,
   "videos": [
@@ -884,6 +884,22 @@
       "relevance_score": 21
     },
     {
+      "video_id": "E71TXLQvh8k",
+      "title": "30% off your Moonshot tickets?! That's a deal you don't want to miss",
+      "headline": "30% off your Moonshot tickets?! That's a deal you don't want to miss",
+      "description": "30% off your Moonshot tickets?! That's a deal you don't want to miss.\nTag your friends, get your tickets at http://Moonshot.techcabal.com and get ready for two days of learning from the brilliant minds building, funding, and shaping the future of innovation in Africa.",
+      "dek": "30% off your Moonshot tickets?! That's a deal you don't want to miss.\nTag your friends, get your tickets at http://Moonshot.techcabal.com and get ready for two days of learning from the brilliant minds building, funding, and shaping the future of innovation in Africa.",
+      "source_name": "Zikoko",
+      "source_url": "https://www.youtube.com/@Zikoko",
+      "video_url": "https://www.youtube.com/watch?v=E71TXLQvh8k",
+      "image_url": "https://i2.ytimg.com/vi/E71TXLQvh8k/hqdefault.jpg",
+      "published_at": "2026-10-20T19:00:37+00:00",
+      "category": "CULTURE",
+      "media_type": "video",
+      "region": "Nigeria",
+      "relevance_score": 20
+    },
+    {
       "video_id": "C_uEWsgSQFM",
       "title": "If you missed Santan Dave’s show in Lagos, Here’s a 3 minute recap of what you missed",
       "headline": "If you missed Santan Dave’s show in Lagos, Here’s a 3 minute recap of what you missed",
@@ -946,22 +962,6 @@
       "media_type": "video",
       "region": "Nigeria",
       "relevance_score": 20
-    },
-    {
-      "video_id": "FJpRGTxFEkw",
-      "title": "Trace Live with PATORANKING - #TraceLivePatoranking",
-      "headline": "Trace Live with PATORANKING - #TraceLivePatoranking",
-      "description": "TRACE presents you a musical masterpiece told through timeless music as we celebrate a successful 10 years of Patoranking's GOD OVER EVERYTHING Album.\n\nPatoranking's evolution as a global artiste cannot be complete without crediting his debut album's success.",
-      "dek": "TRACE presents you a musical masterpiece told through timeless music as we celebrate a successful 10 years of Patoranking's GOD OVER EVERYTHING Album.\n\nPatoranking's evolution as a global artiste cannot be complete without crediting his debut album's success.",
-      "source_name": "TRACENAIJA",
-      "source_url": "https://www.youtube.com/@TRACENAIJA",
-      "video_url": "https://www.youtube.com/watch?v=FJpRGTxFEkw",
-      "image_url": "https://i3.ytimg.com/vi/FJpRGTxFEkw/hqdefault.jpg",
-      "published_at": "2026-09-25T22:26:26+00:00",
-      "category": "MUSIC",
-      "media_type": "video",
-      "region": "Nigeria",
-      "relevance_score": 18
     }
   ],
   "source_errors": [
