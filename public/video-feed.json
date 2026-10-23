@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-23T11:56:29.250Z",
+  "generated_at": "2026-10-23T16:43:23.949Z",
   "source": "FOR THE CULTURE YouTube Video Engine (public RSS)",
   "count": 60,
   "videos": [
@@ -868,22 +868,6 @@
       "relevance_score": 21
     },
     {
-      "video_id": "VVL9TQXEiXQ",
-      "title": "Who Is That One Teacher You Can Never Forget | BIC | Pulse Nigeria",
-      "headline": "Who Is That One Teacher You Can Never Forget | BIC | Pulse Nigeria",
-      "description": "Connect with Pulse Nigeria\n» Read & Watch via our Website: http://www.pulse.ng\n» Like us on Facebook: http://www.facebook.com/pulsenigeria247\n» Follow us on Instagram: https://www.instagram.com/pulsenigeri...\n» Tweet us on Twitter: http://www.twitter.com/pulsenigeria247",
-      "dek": "Connect with Pulse Nigeria\n» Read & Watch via our Website: http://www.pulse.ng\n» Like us on Facebook: http://www.facebook.com/pulsenigeria247\n» Follow us on Instagram: https://www.instagram.com/pulsenigeri...\n» Tweet us on Twitter: http://www.twitter.com/pulsenigeria247",
-      "source_name": "Pulse Nigeria",
-      "source_url": "https://www.youtube.com/@PulseNigeria247",
-      "video_url": "https://www.youtube.com/watch?v=VVL9TQXEiXQ",
-      "image_url": "https://i3.ytimg.com/vi/VVL9TQXEiXQ/hqdefault.jpg",
-      "published_at": "2026-10-05T17:00:07+00:00",
-      "category": "CULTURE",
-      "media_type": "video",
-      "region": "Nigeria",
-      "relevance_score": 21
-    },
-    {
       "video_id": "Q3cQPdbvWtA",
       "title": "Vector BLASTS New Gen Artists: “They Lack Development!",
       "headline": "Vector BLASTS New Gen Artists: “They Lack Development!",
@@ -962,6 +946,22 @@
       "media_type": "video",
       "region": "Nigeria",
       "relevance_score": 20
+    },
+    {
+      "video_id": "JxEiZPRxCOk",
+      "title": "Big Kesh in new pictures 😍",
+      "headline": "Big Kesh in new pictures 😍",
+      "description": "#lilkesh #celebrity #artiste #entertainment #hiptv #afrobeats",
+      "dek": "#lilkesh #celebrity #artiste #entertainment #hiptv #afrobeats",
+      "source_name": "HIPTV",
+      "source_url": "https://www.youtube.com/@official_hiptv",
+      "video_url": "https://www.youtube.com/watch?v=JxEiZPRxCOk",
+      "image_url": "https://i3.ytimg.com/vi/JxEiZPRxCOk/hqdefault.jpg",
+      "published_at": "2026-10-21T08:38:26+00:00",
+      "category": "MUSIC",
+      "media_type": "video",
+      "region": "Nigeria",
+      "relevance_score": 18
     }
   ],
   "source_errors": [
