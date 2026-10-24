@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-10-24T14:48:54.809Z",
+  "generated_at": "2026-10-24T17:53:56.311Z",
   "source": "FOR THE CULTURE YouTube Video Engine (public RSS)",
   "count": 60,
   "videos": [
@@ -900,22 +900,6 @@
       "relevance_score": 20
     },
     {
-      "video_id": "ArHD8m9tRJg",
-      "title": "Highlights from Santan Dave’s Tour in Lagos",
-      "headline": "Highlights from Santan Dave’s Tour in Lagos",
-      "description": "",
-      "dek": "",
-      "source_name": "Zikoko",
-      "source_url": "https://www.youtube.com/@Zikoko",
-      "video_url": "https://www.youtube.com/watch?v=ArHD8m9tRJg",
-      "image_url": "https://i2.ytimg.com/vi/ArHD8m9tRJg/hqdefault.jpg",
-      "published_at": "2026-10-18T16:58:42+00:00",
-      "category": "CULTURE",
-      "media_type": "video",
-      "region": "Nigeria",
-      "relevance_score": 20
-    },
-    {
       "video_id": "vwFkK7H_m-o",
       "title": "Asake's Unreal Hair Transformation ❤️😍 #asake #transformation #hairstyle",
       "headline": "Asake's Unreal Hair Transformation ❤️😍 #asake #transformation #hairstyle",
@@ -959,6 +943,22 @@
       "image_url": "https://i3.ytimg.com/vi/FJpRGTxFEkw/hqdefault.jpg",
       "published_at": "2026-09-25T22:26:26+00:00",
       "category": "MUSIC",
+      "media_type": "video",
+      "region": "Nigeria",
+      "relevance_score": 18
+    },
+    {
+      "video_id": "FnCNi5VPk6g",
+      "title": "Araga Reacts To Goddessa Calling Them Colleagues Outside BBN #interview #bbnaija 💔",
+      "headline": "Araga Reacts To Goddessa Calling Them Colleagues Outside BBN #interview #bbnaija 💔",
+      "description": "@manlikearaga reaction to Goddessa calling him a \"COLLEAGUE\" on this subject of their post Big Brother relationship.\nHe also reveals he didn't really have ties with anyone else asides Gerard at some point\n\n\n#bbnaija #araga #goddessa #bbn #reaction #reactionvideo #reality #realityshow #beatfminterview #bigbrothernaija",
+      "dek": "@manlikearaga reaction to Goddessa calling him a \"COLLEAGUE\" on this subject of their post Big Brother relationship.\nHe also reveals he didn't really have ties with anyone else asides Gerard at some point\n\n\n#bbnaija #araga #goddessa #bbn #reaction #reactionvideo #reality #realityshow #beatfminterview #bigbrothernaija",
+      "source_name": "The Beat99.9 FM",
+      "source_url": "https://www.youtube.com/@thebeat999fm",
+      "video_url": "https://www.youtube.com/watch?v=FnCNi5VPk6g",
+      "image_url": "https://i3.ytimg.com/vi/FnCNi5VPk6g/hqdefault.jpg",
+      "published_at": "2026-09-20T17:00:21+00:00",
+      "category": "CULTURE",
       "media_type": "video",
       "region": "Nigeria",
       "relevance_score": 18
